@@ -106,12 +106,21 @@ raydium-takehome/
 | Stage | 狀態 |
 |---|---|
 | 0 — Repo 初始化 | ✅ 完成 |
-| 1 — `doc_preprocessor` library | ✅ 完成 |
+| 1 — `doc_preprocessor` library | ✅ 完成（含 v2 升級：block-level parse + 段落感知 clean + sentence-aware chunk）|
+| 1.5 — `scripts/demo_pipeline.py` 視覺化驗證 | ✅ 完成 |
 | 2 — 索引建構 | 🔲 未開始 |
 | 3 — MCP Server | 🔲 未開始 |
 | 4 — Claude Skills | 🔲 未開始 |
 | 5 — Zeabur 部署 | 🔲 未開始 |
 | 6 — Demo + 文件收尾 | 🔲 未開始 |
+
+**doc_preprocessor v2 重點**：
+- `Block` dataclass + `block_type ∈ {paragraph, caption, heading}`
+- PDF 用 PyMuPDF `get_text("blocks")` 抓段落，regex 識別 figure/table caption
+- PPTX 把 title placeholder 標為 `heading`
+- `clean_text` 以 `\n\n` 為段落分隔保留語意；`clean_block_text` 處理單一 block
+- `chunk_blocks` 讓 caption/heading 獨立成 chunk，paragraph 以 sentence boundary 切並做 sentence-level overlap
+- 預處理結果：PDF 15 頁 → 484 blocks (9 captions) → 50 chunks；PPTX → 421 blocks (33 headings) → 68 chunks
 
 **下一步**：Stage 2 — `scripts/build_index.py`（生成 chunks JSONL + BM25 索引）。
 

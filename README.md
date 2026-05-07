@@ -15,15 +15,49 @@ Raydium AI 應用工程師 take-home task — Task 1 (MCP Server) + Task 2 (Clau
 ```bash
 # 安裝依賴（需要 uv）
 uv sync
+```
 
+## 視覺化 Pipeline 輸出（推薦先從這裡開始）
+
+執行以下指令，會依序跑完 parse → clean → chunk，並將每個階段的結果寫成 Markdown 檔案到 `data/processed/demo/`：
+
+```bash
+uv run python scripts/demo_pipeline.py
+```
+
+產生的檔案：
+
+| 檔案 | 內容 |
+|---|---|
+| `data/processed/demo/parse_pdf.md` | PDF 每頁的 **Block 列表**，每個 block 標註 `paragraph` / `caption` / `heading` |
+| `data/processed/demo/parse_pptx.md` | PPTX 每張投影片的 Block 列表（含 title heading 識別）|
+| `data/processed/demo/clean_pdf.md` | 段落感知清洗結果（每個 block 獨立清洗，段落界線保留）|
+| `data/processed/demo/clean_pptx.md` | PPTX 清洗結果 |
+| `data/processed/demo/chunks_pdf.md` | PDF 切塊結果（max 220 words，overlap 1 sentence；caption 獨立成 chunk）|
+| `data/processed/demo/chunks_pptx.md` | PPTX 切塊結果 |
+
+### 預處理 pipeline 設計重點
+
+- **Block-level parsing**：PDF 用 PyMuPDF `get_text("blocks")` 抓 paragraph block；PPTX 用每個 `text_frame.paragraphs` 當 block。每個 block 帶 `block_type`，並用 regex `^(Figure|Fig\.?|Table|圖|表)\s*\d+[:.]` 識別 caption。
+- **段落感知清洗**：`clean_text` 以 `\n\n` 切段落、各自清洗、再組回去。Block 內的行內換行 → 空白；段落界線保留。
+- **語意切塊**：caption / heading **獨立成 chunk**（不會被混入內文）；paragraph 依字數打包；超大段落以 sentence boundary `[.!?。！？]` 拆分；body chunk 之間以 sentence-level overlap 銜接。
+
+## 執行單元測試
+
+```bash
+uv run pytest
+```
+
+35 個測試涵蓋 cleaner / chunker / chunk_blocks / parse_pdf / parse_pptx，包含 caption isolation、paragraph preservation、sentence overlap 等行為驗證。
+
+## 建構索引與啟動 MCP Server
+
+```bash
 # 建構索引
 uv run python scripts/build_index.py
 
 # 啟動 MCP Server
 uv run python apps/mcp_server/server.py
-
-# 執行測試
-uv run pytest
 ```
 
 ## 驗證 MCP Server
