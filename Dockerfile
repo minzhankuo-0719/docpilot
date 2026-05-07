@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir uv
 # Copy dependency manifest first (better layer caching)
 COPY pyproject.toml ./
 
-# Install all runtime dependencies (no dev extras)
+# Install all runtime dependencies
 RUN uv pip install --system --no-cache \
     pymupdf \
     python-pptx \

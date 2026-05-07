@@ -12,7 +12,6 @@ build/
 # uv / venv
 .venv/
 venv/
-uv.lock
 
 # Environment
 .env
@@ -35,8 +34,11 @@ Thumbs.db
 htmlcov/
 .ruff_cache/
 
-# Processed data (rebuilt from scripts)
-data/processed/
+# Processed data — exclude heavy/temp outputs, but track the index files
+data/processed/demo/
+data/processed/query_results.md
+data/processed/embeddings.npy
+data/processed/embedding_ids.json
 
 # Claude Code local settings (entire dir is machine-specific)
 .claude/
