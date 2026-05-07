@@ -101,7 +101,21 @@ raydium-takehome/
     └── AI_WORKFLOW.md
 ```
 
-## 七、協作慣例
+## 七、目前進度
+
+| Stage | 狀態 |
+|---|---|
+| 0 — Repo 初始化 | ✅ 完成 |
+| 1 — `doc_preprocessor` library | ✅ 完成 |
+| 2 — 索引建構 | 🔲 未開始 |
+| 3 — MCP Server | 🔲 未開始 |
+| 4 — Claude Skills | 🔲 未開始 |
+| 5 — Zeabur 部署 | 🔲 未開始 |
+| 6 — Demo + 文件收尾 | 🔲 未開始 |
+
+**下一步**：Stage 2 — `scripts/build_index.py`（生成 chunks JSONL + BM25 索引）。
+
+## 八、協作慣例
 
 - 每完成一個 stage 才 commit + push，commit message 要有意義
 - 每次跑 Bash 指令前先用 1-2 句話說明在做什麼、為什麼現在跑
