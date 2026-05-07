@@ -103,16 +103,16 @@ raydium-takehome/
 
 ## 七、目前進度
 
-| Stage | 狀態 |
-|---|---|
-| 0 — Repo 初始化 | ✅ 完成 |
-| 1 — `doc_preprocessor` library | ✅ 完成（含 v2 升級：block-level parse + 段落感知 clean + sentence-aware chunk）|
-| 1.5 — `scripts/demo_pipeline.py` 視覺化驗證 | ✅ 完成 |
-| 2 — 索引建構 | 🔲 未開始 |
-| 3 — MCP Server | 🔲 未開始 |
-| 4 — Claude Skills | 🔲 未開始 |
-| 5 — Zeabur 部署 | 🔲 未開始 |
-| 6 — Demo + 文件收尾 | 🔲 未開始 |
+| Stage | 狀態 | 產出與備注 |
+|---|---|---|
+| 0 — Repo 初始化 | ✅ 完成 | 目錄結構、`pyproject.toml`、`.gitignore`、GitHub remote |
+| 1 — `doc_preprocessor` library | ✅ 完成 | v2：block-level parse + 段落感知 clean + sentence-aware chunk；`pytest` 通過 |
+| 1.5 — `scripts/demo_pipeline.py` 視覺化驗證 | ✅ 完成 | `data/processed/query_results.md` 有輸出結果 |
+| 2 — 索引建構 | ✅ 完成 | `data/processed/chunks.jsonl`、`bm25_index.pkl`、`bm25_corpus.pkl` 已產出；`scripts/build_index.py` 可重跑 |
+| 3 — MCP Server | ✅ 完成 | `server.py` + `retrieval.py` 已驗證；`mcp_client.py` 5/5 通過；`Dockerfile` 已補齊 |
+| 4 — Claude Skills | ✅ 完成 | `parse-pdf`、`parse-pptx`、`clean-text`、`chunk-content` 各含 `SKILL.md` + `scripts/run.py`；全部驗證通過；已安裝至 `~/.claude/skills/` |
+| 5 — Zeabur 部署 | 🔲 未開始 | `Dockerfile` 空白；無 `zeabur.yaml`；無公開 URL |
+| 6 — Demo + 文件收尾 | 🔲 未開始 | README 未完整；`docs/AI_WORKFLOW.md` 未補充 |
 
 **doc_preprocessor v2 重點**：
 - `Block` dataclass + `block_type ∈ {paragraph, caption, heading}`
@@ -122,7 +122,14 @@ raydium-takehome/
 - `chunk_blocks` 讓 caption/heading 獨立成 chunk，paragraph 以 sentence boundary 切並做 sentence-level overlap
 - 預處理結果：PDF 15 頁 → 484 blocks (9 captions) → 50 chunks；PPTX → 421 blocks (33 headings) → 68 chunks
 
-**下一步**：Stage 2 — `scripts/build_index.py`（生成 chunks JSONL + BM25 索引）。
+**下一步**：Stage 5 — Zeabur 部署（Dockerfile 已備，需加 `zeabur.yaml` 並推上去）。
+
+## 七之一、待修復 Bug
+
+| # | 問題 | 現象 | 根本原因 | 預計解法 |
+|---|---|---|---|---|
+| B-01 | PDF 視覺化範例圖被解析為高分 chunk | Query 2/4/5 的 Rank 1-2 都是 `The Law will never be perfect...` 這串字元間有大量空白的噪音內容，佔據高位 | PDF 第 14-15 頁的翻譯視覺化圖內嵌大量重複文字，BM25 只看詞頻不懂語意，長 chunk 得分虛高 | 加入 Voyage AI embedding 做 hybrid search；或在 chunker 加噪音偵測過濾掉字元密度異常的 block |
+| B-02 | Figure 內嵌 token 文字被當作正文解析 | PDF 圖片（如 Transformer 輸入示意圖）中每個 token 獨佔一行，被 PyMuPDF 抽取為大量單詞斷行的文字，混入正文 chunk，造成誤導性搜尋結果 | PyMuPDF `get_text("blocks")` 無法區分 figure 內文字與正文；圖片內的 token 以極小字型排列，每字自成一行 | 在 `pdf.py` 的 block 過濾階段，偵測「平均每行字數 < 3 且行數 > 10」的 block 標記為 `figure_text` 並於 chunking 前丟棄；或改用 `get_text("dict")` 以 font size 門檻過濾小字 |
 
 ## 八、協作慣例
 

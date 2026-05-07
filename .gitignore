@@ -38,5 +38,5 @@ htmlcov/
 # Processed data (rebuilt from scripts)
 data/processed/
 
-# Claude Code local settings
-.claude/settings.local.json
+# Claude Code local settings (entire dir is machine-specific)
+.claude/
