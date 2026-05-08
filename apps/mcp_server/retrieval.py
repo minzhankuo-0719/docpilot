@@ -138,6 +138,12 @@ class KnowledgeBase:
     def get_chunk(self, chunk_id: str) -> dict[str, Any] | None:
         return self._id_map.get(chunk_id)
 
+    @property
+    def search_mode(self) -> str:
+        if self._embeddings is not None and self._voyage_client is not None:
+            return "hybrid"
+        return "bm25"
+
     def list_documents(self) -> list[dict[str, Any]]:
         summary: dict[str, dict[str, Any]] = {}
         for chunk in self._chunks:
@@ -149,7 +155,9 @@ class KnowledgeBase:
                     "chunk_count": 0,
                 }
             summary[doc_id]["chunk_count"] += 1
-        return list(summary.values())
+        docs = list(summary.values())
+        docs.append({"search_mode": self.search_mode})
+        return docs
 
     @staticmethod
     def _make_result(chunk: dict[str, Any], score: float) -> SearchResult:
