@@ -112,6 +112,7 @@ def chunk_blocks(
     """
     chunks: list[Chunk] = []
     idx = 0
+    current_section: str | None = None
 
     # `pending` queues paragraph text for the next body chunk.
     # `has_fresh` is True iff pending contains *new* content (not just
@@ -123,6 +124,9 @@ def chunk_blocks(
 
     def emit(text: str, block_type: str) -> None:
         nonlocal idx
+        meta: dict[str, Any] = {"block_type": block_type}
+        if block_type == "paragraph" and current_section is not None:
+            meta["section"] = current_section
         chunks.append(Chunk(
             chunk_id=_make_chunk_id(doc_id, page_or_slide, idx),
             doc_id=doc_id,
@@ -130,7 +134,7 @@ def chunk_blocks(
             page_or_slide=page_or_slide,
             chunk_index=idx,
             text=text,
-            metadata={"block_type": block_type},
+            metadata=meta,
         ))
         idx += 1
 
@@ -167,6 +171,8 @@ def chunk_blocks(
             flush_body()
             reset_pending()
             emit(text, block.block_type)
+            if block.block_type == "heading":
+                current_section = text
             continue
 
         words = len(text.split())

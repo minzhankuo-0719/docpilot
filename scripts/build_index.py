@@ -19,6 +19,7 @@ import json
 import os
 import pickle
 import sys
+import time
 from dataclasses import asdict
 from pathlib import Path
 
@@ -40,8 +41,10 @@ PDF_PATH = ROOT / "data" / "raw" / "attention.pdf"
 PPTX_PATH = ROOT / "data" / "raw" / "attention_presentation.pptx"
 
 # BM25 tokeniser: lowercase + whitespace split; fast, no NLTK dependency.
-def _tokenise(text: str) -> list[str]:
-    return text.lower().split()
+# section is injected into the search text so heading keywords match body chunks.
+def _tokenise(text: str, section: str = "") -> list[str]:
+    combined = f"{section} {text}" if section else text
+    return combined.lower().split()
 
 
 def _build_pdf_chunks() -> list[Chunk]:
@@ -103,7 +106,7 @@ def _save_chunks_jsonl(chunks: list[Chunk], path: Path) -> None:
 def _build_bm25(chunks: list[Chunk]) -> None:
     from rank_bm25 import BM25Okapi
 
-    corpus = [_tokenise(c.text) for c in chunks]
+    corpus = [_tokenise(c.text, c.metadata.get("section", "")) for c in chunks]
     index = BM25Okapi(corpus)
 
     index_path = PROCESSED_DIR / "bm25_index.pkl"
@@ -134,8 +137,9 @@ def _build_voyage_embeddings(chunks: list[Chunk]) -> None:
     print(f"[Voyage] embedding {len(chunks)} chunks with voyage-3-lite …")
     client = voyageai.Client(api_key=api_key)
 
-    # Voyage API accepts up to 128 texts per call.
-    BATCH = 128
+    # Free tier: 3 RPM / 10K TPM → ~10 chunks per batch, 21s between requests.
+    BATCH = 10
+    SLEEP = 21
     all_embeddings: list[list[float]] = []
     for start in range(0, len(chunks), BATCH):
         batch = chunks[start : start + BATCH]
@@ -145,7 +149,10 @@ def _build_voyage_embeddings(chunks: list[Chunk]) -> None:
             input_type="document",
         )
         all_embeddings.extend(result.embeddings)
-        print(f"[Voyage]   embedded {min(start + BATCH, len(chunks))}/{len(chunks)}")
+        done = min(start + BATCH, len(chunks))
+        print(f"[Voyage]   embedded {done}/{len(chunks)}")
+        if done < len(chunks):
+            time.sleep(SLEEP)
 
     import numpy as np
     emb_array = np.array(all_embeddings, dtype=np.float32)

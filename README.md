@@ -92,7 +92,7 @@ uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
 
 - 部署平台：Render（免費 tier，auto-scale down 後有 ~30s 冷啟動）
 - 連線測試：見上方「驗證 MCP Server」章節
-- Claude Desktop：可透過 `http://docpilot-5hht.onrender.com/mcp` 連線此 MCP server
+- Claude Desktop：透過 `mcp-remote` 橋接連線此遠端 server，設定方式見 [DEMO.md](DEMO.md) Step 3
 
 ## 目錄結構
 

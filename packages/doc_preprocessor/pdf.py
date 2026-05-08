@@ -22,6 +22,9 @@ _CAPTION_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Numbered section headings: "1 Introduction" (same line) or "1\nIntroduction" (two lines)
+_HEADING_NUMBER_RE = re.compile(r"^\d+(\.\d+)*\.?$")
+
 # Heuristic threshold for figure-token noise (B-02). PyMuPDF extracts text
 # inside diagrams (e.g. Transformer input figures where each token sits on
 # its own line) as long, single-word-per-line blocks. Drop them before they
@@ -38,6 +41,14 @@ def _is_figure_token_noise(text: str) -> bool:
     total_words = sum(len(ln.split()) for ln in lines)
     avg = total_words / len(lines)
     return avg < FIGURE_NOISE_MAX_AVG_WORDS
+
+
+def _is_sparse_short_block(text: str) -> bool:
+    """Return True for single-line blocks with at most one word (e.g. stray page numbers)."""
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if len(lines) != 1:
+        return False
+    return len(lines[0].split()) <= 1
 
 
 @dataclass
@@ -59,6 +70,11 @@ class ParsedPage:
 def _classify(text: str) -> BlockType:
     if _CAPTION_RE.match(text):
         return "caption"
+    lines = [ln for ln in text.strip().splitlines() if ln.strip()]
+    if 1 <= len(lines) <= 2:
+        # "1\nIntroduction" or "3.1\nEncoder and Decoder Stacks"
+        if _HEADING_NUMBER_RE.match(lines[0].strip()):
+            return "heading"
     return "paragraph"
 
 
@@ -84,6 +100,8 @@ def parse_pdf(path: str | Path) -> list[ParsedPage]:
                 if not text:
                     continue
                 if _is_figure_token_noise(text):
+                    continue
+                if _is_sparse_short_block(text):
                     continue
                 blocks.append(Block(
                     text=text,

@@ -42,3 +42,9 @@ data/processed/embedding_ids.json
 
 # Claude Code local settings (entire dir is machine-specific)
 .claude/
+
+# Local demo notes (personal, not for repo)
+DEMO.md
+
+# Raw extraction demo (local exploration only)
+scripts/demo_raw.py
