@@ -56,6 +56,7 @@ class KnowledgeBase:
         self._emb_ids: list[str] = []
         self._voyage_client: Any = None
         self._loaded = False
+        self._load_debug: str = ""
 
     def load(self) -> None:
         if self._loaded:
@@ -76,7 +77,11 @@ class KnowledgeBase:
 
     def _load_embeddings(self) -> None:
         api_key = os.environ.get("VOYAGE_API_KEY", "")
-        if not api_key or not EMBEDDINGS_NPY.exists():
+        if not api_key:
+            self._load_debug = "no VOYAGE_API_KEY"
+            return
+        if not EMBEDDINGS_NPY.exists():
+            self._load_debug = f"embeddings.npy not found at {EMBEDDINGS_NPY}"
             return
         try:
             import numpy as np
@@ -86,8 +91,11 @@ class KnowledgeBase:
             with EMBEDDING_IDS_JSON.open(encoding="utf-8") as fh:
                 self._emb_ids = json.load(fh)
             self._voyage_client = voyageai.Client(api_key=api_key)
-        except ImportError:
-            pass
+            self._load_debug = "ok"
+        except ImportError as e:
+            self._load_debug = f"ImportError: {e}"
+        except Exception as e:
+            self._load_debug = f"error: {e}"
 
     # ------------------------------------------------------------------ #
     # Public API                                                           #
@@ -142,7 +150,7 @@ class KnowledgeBase:
     def search_mode(self) -> str:
         if self._embeddings is not None and self._voyage_client is not None:
             return "hybrid"
-        return "bm25"
+        return f"bm25 ({self._load_debug})"
 
     def list_documents(self) -> list[dict[str, Any]]:
         summary: dict[str, dict[str, Any]] = {}
