@@ -76,6 +76,11 @@ uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
 - 使用 `python-pptx` 解析 PPTX（逐 slide 提取文字與備註）
 - 混合檢索（BM25 + Voyage AI）；若未設定 `VOYAGE_API_KEY` 則 fallback 到純 BM25
 - MCP transport 使用 Streamable HTTP，部署於 Render（免費 tier）
+- **Render 部署採純 BM25**：embeddings 檔案（`embeddings.npy` / `embedding_ids.json`）為本機重建後產生且未 commit（被 `.gitignore` 排除）；遠端容器啟動時 `VOYAGE_API_KEY` 也未注入，因此 `KnowledgeBase` 會自動 fallback 到純 BM25。本機如需驗證 hybrid，請設定 `VOYAGE_API_KEY` 後重跑 `build_index.py`。
+
+## 已知限制
+
+- **B-01**：PDF 第 14–15 頁的視覺化範例圖內嵌大量重複文字（如 `The Law will never be perfect ...`），BM25 純詞頻計分會把這些噪音 chunk 排到高位。緩解方案是 hybrid search（embedding 對語意敏感），但目前遠端僅有 BM25，因此這個 retrieval bias 仍存在。本機啟用 Voyage embedding 後可顯著降低其影響。
 
 ## AI 協作工作流程
 

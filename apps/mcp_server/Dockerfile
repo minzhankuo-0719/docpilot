@@ -22,6 +22,11 @@ RUN uv pip install --system --no-cache \
 # Copy source
 COPY packages/ ./packages/
 COPY apps/mcp_server/ ./apps/mcp_server/
+
+# Pre-built BM25 index. Voyage embedding artefacts (embeddings.npy /
+# embedding_ids.json) are intentionally NOT copied — they are .gitignored and
+# the deployed container falls back to pure BM25 unless VOYAGE_API_KEY is set
+# AND the embedding files are mounted in (see retrieval.KnowledgeBase).
 COPY data/processed/chunks.jsonl ./data/processed/chunks.jsonl
 COPY data/processed/bm25_index.pkl ./data/processed/bm25_index.pkl
 COPY data/processed/bm25_corpus.pkl ./data/processed/bm25_corpus.pkl
