@@ -131,7 +131,23 @@ raydium-takehome/
 | B-01 | PDF 視覺化範例圖被解析為高分 chunk | Query 2/4/5 的 Rank 1-2 都是 `The Law will never be perfect...` 這串字元間有大量空白的噪音內容，佔據高位 | PDF 第 14-15 頁的翻譯視覺化圖內嵌大量重複文字，BM25 只看詞頻不懂語意，長 chunk 得分虛高 | **已記錄為 known limitation（README）**。本機啟用 Voyage hybrid search 可緩解；遠端純 BM25 仍受影響 |
 | B-02 | Figure 內嵌 token 文字被當作正文解析 | PDF 圖片中每個 token 獨佔一行，被 PyMuPDF 抽取為單詞斷行文字，混入正文 chunk | PyMuPDF `get_text("blocks")` 無法區分 figure 內文字與正文 | **已修復**。`pdf.py` 加入 `_is_figure_token_noise`（行數 > 10 且平均每行字數 < 3 即丟棄），單元測試覆蓋 4 case；PDF chunks 從 50 → 48 |
 
-## 八、協作慣例
+## 八、待做清單（Backlog）
+
+### 座標感知 chunking
+
+**背景**：目前 `pdf.py` 用 `get_text("blocks")` 抓文字，表格的欄列結構會消失。測試中查詢 Table 2 時，MCP 只能回傳 caption 與提及表格的段落，無法回傳結構化表格內容。
+
+| # | 功能 | 改動位置 | 做法 | 優先度 |
+|---|---|---|---|---|
+| T-01 | `page.find_tables()` 表格偵測 | `packages/doc_preprocessor/pdf.py` | 每頁用 `find_tables()` 偵測表格區域，轉成 Markdown table 字串，標記 `block_type="table"` 插入 blocks | 高 |
+| T-02 | 雙欄排序修正 | `packages/doc_preprocessor/pdf.py` | 依 `x0` 判斷左/右欄，各自 `y0` 排序後合併，修正閱讀順序 | 中 |
+| T-03 | 空間鄰近 chunk 群組 | `chunker.py` 或 `pdf.py` | `y0` 相近的 blocks 視為同一視覺群組，不跨群組合併 chunk | 低 |
+
+**前提**：T-01 需確認 PyMuPDF 版本 ≥ 1.23.0（`find_tables()` 才有支援）。
+
+---
+
+## 九、協作慣例
 
 - 每完成一個 stage 才 commit + push，commit message 要有意義
 - 每次跑 Bash 指令前先用 1-2 句話說明在做什麼、為什麼現在跑
