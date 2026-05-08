@@ -22,6 +22,23 @@ _CAPTION_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Heuristic threshold for figure-token noise (B-02). PyMuPDF extracts text
+# inside diagrams (e.g. Transformer input figures where each token sits on
+# its own line) as long, single-word-per-line blocks. Drop them before they
+# pollute body chunks.
+FIGURE_NOISE_MIN_LINES = 10
+FIGURE_NOISE_MAX_AVG_WORDS = 3.0
+
+
+def _is_figure_token_noise(text: str) -> bool:
+    """Return True if a block looks like figure-internal token spam."""
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if len(lines) <= FIGURE_NOISE_MIN_LINES:
+        return False
+    total_words = sum(len(ln.split()) for ln in lines)
+    avg = total_words / len(lines)
+    return avg < FIGURE_NOISE_MAX_AVG_WORDS
+
 
 @dataclass
 class Block:
@@ -65,6 +82,8 @@ def parse_pdf(path: str | Path) -> list[ParsedPage]:
                     continue
                 text = btext.strip()
                 if not text:
+                    continue
+                if _is_figure_token_noise(text):
                     continue
                 blocks.append(Block(
                     text=text,

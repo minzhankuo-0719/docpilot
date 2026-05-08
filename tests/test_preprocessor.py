@@ -18,6 +18,7 @@ from doc_preprocessor import (
     parse_pdf,
     parse_pptx,
 )
+from doc_preprocessor.pdf import _is_figure_token_noise
 
 RAW_DIR = Path(__file__).parent.parent / "data" / "raw"
 PDF_PATH = RAW_DIR / "attention.pdf"
@@ -185,6 +186,33 @@ class TestChunkBlocks:
                 last_sent = prev.text.rstrip(".").split(".")[-1].strip()
                 if last_sent:
                     assert last_sent in curr.text
+
+
+# ---------------------------------------------------------------------------
+# PDF figure-token noise filter (B-02)
+# ---------------------------------------------------------------------------
+
+class TestFigureTokenNoise:
+    def test_short_block_kept(self):
+        # Normal paragraphs have multi-word lines; never flagged.
+        text = "This is a normal paragraph with several words per line.\nIt has two lines."
+        assert _is_figure_token_noise(text) is False
+
+    def test_many_single_word_lines_flagged(self):
+        # Mimics figure-internal token spam: 12 single-word lines.
+        text = "\n".join(f"token{i}" for i in range(12))
+        assert _is_figure_token_noise(text) is True
+
+    def test_short_token_block_not_flagged(self):
+        # Few lines (<= threshold) should not trigger even if single-word.
+        text = "\n".join(["a", "b", "c"])
+        assert _is_figure_token_noise(text) is False
+
+    def test_long_block_with_normal_lines_not_flagged(self):
+        # 12 lines but each line has 5+ words → real prose, keep it.
+        line = "this is a normal sentence here"
+        text = "\n".join([line] * 12)
+        assert _is_figure_token_noise(text) is False
 
 
 # ---------------------------------------------------------------------------
