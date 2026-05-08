@@ -63,7 +63,11 @@ uv run python apps/mcp_server/server.py
 ## 驗證 MCP Server
 
 ```bash
+# 本機測試
 uv run python tests/mcp_client.py
+
+# 遠端測試（Render）
+uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
 ```
 
 ## 主要假設
@@ -71,7 +75,7 @@ uv run python tests/mcp_client.py
 - 使用 `pymupdf` 解析 PDF（速度快、對學術論文表格支援佳）
 - 使用 `python-pptx` 解析 PPTX（逐 slide 提取文字與備註）
 - 混合檢索（BM25 + Voyage AI）；若未設定 `VOYAGE_API_KEY` 則 fallback 到純 BM25
-- MCP transport 使用 Streamable HTTP，部署於 Zeabur
+- MCP transport 使用 Streamable HTTP，部署於 Render（免費 tier）
 
 ## AI 協作工作流程
 
@@ -79,7 +83,11 @@ uv run python tests/mcp_client.py
 
 ## 部署
 
-Public URL（Zeabur）：*待補充*
+**Public MCP Server**（Render）：https://docpilot-5hht.onrender.com
+
+- 部署平台：Render（免費 tier，auto-scale down 後有 ~30s 冷啟動）
+- 連線測試：見上方「驗證 MCP Server」章節
+- Claude Desktop：可透過 `http://docpilot-5hht.onrender.com/mcp` 連線此 MCP server
 
 ## 目錄結構
 
