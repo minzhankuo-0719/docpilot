@@ -43,7 +43,7 @@ Package the unstructured data preprocessing capabilities (like parsing PDFs or P
 | MCP framework | FastMCP（官方 Python SDK） |
 | MCP transport | Streamable HTTP |
 | 檢索策略 | Hybrid（BM25 + Voyage AI embedding），fallback 到純 BM25 |
-| 部署平台 | **Zeabur** |
+| 部署平台 | **Render**（免費 tier，Docker 部署）|
 | MCP 驗證 | Claude Desktop 連線 + 自製 test client 腳本 |
 
 ## 四、來源資料
@@ -111,7 +111,7 @@ raydium-takehome/
 | 2 — 索引建構 | ✅ 完成 | `data/processed/chunks.jsonl`、`bm25_index.pkl`、`bm25_corpus.pkl` 已產出；`scripts/build_index.py` 可重跑 |
 | 3 — MCP Server | ✅ 完成 | `server.py` + `retrieval.py` 已驗證；`mcp_client.py` 5/5 通過；`Dockerfile` 已補齊 |
 | 4 — Claude Skills | ✅ 完成 | `parse-pdf`、`parse-pptx`、`clean-text`、`chunk-content` 各含 `SKILL.md` + `scripts/run.py`；全部驗證通過；已安裝至 `~/.claude/skills/` |
-| 5 — Zeabur 部署 | 🔲 未開始 | `Dockerfile` 空白；無 `zeabur.yaml`；無公開 URL |
+| 5 — Render 部署 | 🔲 未開始 | `Dockerfile` 已備；`render.yaml` 已備；待連 GitHub 取得公開 URL |
 | 6 — Demo + 文件收尾 | 🔲 未開始 | README 未完整；`docs/AI_WORKFLOW.md` 未補充 |
 
 **doc_preprocessor v2 重點**：
