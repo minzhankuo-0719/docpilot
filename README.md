@@ -42,6 +42,43 @@ uv run python scripts/demo_pipeline.py
 - **段落感知清洗**：`clean_text` 以 `\n\n` 切段落、各自清洗、再組回去。Block 內的行內換行 → 空白；段落界線保留。
 - **語意切塊**：caption / heading **獨立成 chunk**（不會被混入內文）；paragraph 依字數打包；超大段落以 sentence boundary `[.!?。！？]` 拆分；body chunk 之間以 sentence-level overlap 銜接。
 
+## Claude Skills（Task 2）
+
+四個 skill 封裝了文件預處理各階段的能力，可在 Claude Code 中直接呼叫。
+
+| Skill | 功能 | 預設輸出路徑 |
+|---|---|---|
+| `parse-pdf` | 解析 PDF → 結構化 blocks JSON | `data/processed/<stem>_parsed.json` |
+| `parse-pptx` | 解析 PPTX → 結構化 blocks JSON | `data/processed/<stem>_parsed.json` |
+| `clean-text` | 清洗原始文字（修復 soft-hyphen、換行等） | `data/processed/<stem>_cleaned.txt` |
+| `chunk-content` | 切塊供 RAG 使用（含 sentence-level overlap） | `data/processed/<doc-id>_chunks.json` |
+
+### 安裝 Skills
+
+```bash
+# 從專案根目錄執行，複製四個 skill 到 Claude Code 的 skills 目錄
+cp -r skills/parse-pdf   ~/.claude/skills/
+cp -r skills/parse-pptx  ~/.claude/skills/
+cp -r skills/clean-text  ~/.claude/skills/
+cp -r skills/chunk-content ~/.claude/skills/
+```
+
+安裝後在 Claude Code 對話中即可直接呼叫，例如：
+
+> 「幫我解析 data/raw/transformer.pdf」
+
+結果會自動寫入 `data/processed/transformer_parsed.json`，並顯示：
+
+```
+Output saved to: /your/project/data/processed/transformer_parsed.json
+```
+
+如需自訂輸出路徑，加上 `--output` 參數：
+
+```bash
+uv run python skills/parse-pdf/scripts/run.py data/raw/transformer.pdf --output my_output.json
+```
+
 ## 執行單元測試
 
 ```bash

@@ -23,6 +23,7 @@ MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
 def main() -> None:
     parser = argparse.ArgumentParser(description="Parse a PPTX into structured blocks.")
     parser.add_argument("pptx_path", help="Path to the PPTX file")
+    parser.add_argument("--output", help="Output file path (default: data/processed/<stem>_parsed.json)")
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
     args = parser.parse_args()
 
@@ -54,7 +55,12 @@ def main() -> None:
     ]
 
     indent = 2 if args.pretty else None
-    print(json.dumps(output, ensure_ascii=False, indent=indent))
+    json_str = json.dumps(output, ensure_ascii=False, indent=indent)
+
+    out_path = Path(args.output) if args.output else Path.cwd() / "data" / "processed" / f"{path.stem}_parsed.json"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json_str, encoding="utf-8")
+    print(f"Output saved to: {out_path.resolve()}")
 
 
 if __name__ == "__main__":
