@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import pickle
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -121,11 +122,22 @@ class KnowledgeBase:
         tokens = _tokenise(query)
         bm25_scores: np.ndarray = _normalise(np.array(self._bm25.get_scores(tokens)))
 
-        # Cosine similarity via Voyage embedding
-        result = self._voyage_client.embed(
-            [query], model="voyage-3-lite", input_type="query"
-        )
-        q_vec: np.ndarray = np.array(result.embeddings[0], dtype=np.float32)
+        # Cosine similarity via Voyage embedding. Any failure here (timeout,
+        # rate limit, auth error, network blip) falls back to pure BM25 so the
+        # tool still returns useful results instead of bubbling up a 500.
+        try:
+            result = self._voyage_client.embed(
+                [query], model="voyage-3-lite", input_type="query"
+            )
+            q_vec: np.ndarray = np.array(result.embeddings[0], dtype=np.float32)
+        except Exception as e:  # noqa: BLE001 — degrade gracefully on any client error
+            print(
+                f"[hybrid_search] Voyage embed failed ({type(e).__name__}: {e}); "
+                f"falling back to BM25",
+                file=sys.stderr,
+            )
+            return self._bm25_search(query, top_k)
+
         norms = np.linalg.norm(self._embeddings, axis=1, keepdims=True)
         safe_norms = np.where(norms == 0, 1.0, norms)
         cosine: np.ndarray = self._embeddings @ q_vec / (safe_norms.squeeze() * np.linalg.norm(q_vec))

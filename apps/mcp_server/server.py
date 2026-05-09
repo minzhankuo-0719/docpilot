@@ -29,6 +29,12 @@ from mcp.server.fastmcp import FastMCP
 
 from retrieval import kb  # relative import — server is run from its own dir
 
+# Guardrails for the public search() tool. Tight enough that an over-eager
+# agent can't blow through the free-tier instance, generous enough to cover
+# every realistic natural-language query.
+MAX_QUERY_CHARS = 500
+MAX_TOP_K = 20
+
 # ------------------------------------------------------------------ #
 # Lifespan: load index once at startup                                #
 # ------------------------------------------------------------------ #
@@ -70,6 +76,10 @@ def search(query: str, top_k: int = 5) -> list[dict[str, Any]]:
     Each result includes chunk_id, doc_id, source, page_or_slide, text, score,
     and metadata (block_type).
     """
+    query = (query or "").strip()[:MAX_QUERY_CHARS]
+    if not query:
+        return []
+    top_k = max(1, min(int(top_k), MAX_TOP_K))
     results = kb.search(query, top_k=top_k)
     return [asdict(r) for r in results]
 

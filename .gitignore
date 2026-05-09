@@ -28,15 +28,23 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Office lock files (e.g. ~$transformer_presentation.pptx while PowerPoint has it open)
+~$*
+
 # Test / coverage
 .pytest_cache/
 .coverage
 htmlcov/
 .ruff_cache/
 
-# Processed data — exclude heavy/temp outputs, but track the index files
-data/processed/demo/
-data/processed/query_results.md
+# Processed data — ignore everything by default, allow-list the index files
+# we explicitly want shipped with the repo (so Render's cold start is fast).
+data/processed/*
+!data/processed/bm25_corpus.pkl
+!data/processed/bm25_index.pkl
+!data/processed/chunks.jsonl
+!data/processed/embedding_ids.json
+!data/processed/embeddings.npy
 
 # Claude Code local settings (entire dir is machine-specific)
 .claude/

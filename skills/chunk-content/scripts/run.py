@@ -23,6 +23,11 @@ sys.path.insert(0, str(ROOT))
 from packages.doc_preprocessor.chunker import chunk_blocks, chunk_text
 from packages.doc_preprocessor.pdf import Block
 
+# Skill safety boundary — refuse extreme inputs before they hit the chunker.
+MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
+MAX_WORDS_HARD_CAP = 2000               # any larger and chunks stop being useful for retrieval
+OVERLAP_HARD_CAP = 50                   # overlap >= max_words causes degenerate behaviour
+
 
 def _chunks_from_text(
     text: str,
@@ -82,6 +87,15 @@ def main() -> None:
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
     args = parser.parse_args()
 
+    max_words = max(20, min(args.max_words, MAX_WORDS_HARD_CAP))
+    overlap = max(0, min(args.overlap, OVERLAP_HARD_CAP))
+    if overlap >= max_words:
+        print(
+            f"Error: --overlap ({overlap}) must be smaller than --max-words ({max_words}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     if args.input:
         if not args.source:
             print("Error: --source is required when using --input", file=sys.stderr)
@@ -90,16 +104,30 @@ def main() -> None:
         if not path.exists():
             print(f"Error: file not found: {path}", file=sys.stderr)
             sys.exit(1)
+        size = path.stat().st_size
+        if size > MAX_FILE_SIZE_BYTES:
+            print(
+                f"Error: {path} is {size} bytes; max allowed is {MAX_FILE_SIZE_BYTES}.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
         text = path.read_text(encoding="utf-8")
-        chunks = _chunks_from_text(text, args.doc_id, args.source, args.max_words, args.overlap)
+        chunks = _chunks_from_text(text, args.doc_id, args.source, max_words, overlap)
 
     else:  # --json
         path = Path(args.json)
         if not path.exists():
             print(f"Error: file not found: {path}", file=sys.stderr)
             sys.exit(1)
+        size = path.stat().st_size
+        if size > MAX_FILE_SIZE_BYTES:
+            print(
+                f"Error: {path} is {size} bytes; max allowed is {MAX_FILE_SIZE_BYTES}.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
         data = json.loads(path.read_text(encoding="utf-8"))
-        chunks = _chunks_from_json(data, args.doc_id, args.max_words, args.overlap)
+        chunks = _chunks_from_json(data, args.doc_id, max_words, overlap)
 
     indent = 2 if args.pretty else None
     print(json.dumps(chunks, ensure_ascii=False, indent=indent))

@@ -15,6 +15,10 @@ sys.path.insert(0, str(ROOT))
 
 from packages.doc_preprocessor.pptx import parse_pptx
 
+# Skill safety boundary — refuse abnormally large decks before python-pptx
+# unzips them in memory.
+MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Parse a PPTX into structured blocks.")
@@ -25,6 +29,13 @@ def main() -> None:
     path = Path(args.pptx_path)
     if not path.exists():
         print(f"Error: file not found: {path}", file=sys.stderr)
+        sys.exit(1)
+    size = path.stat().st_size
+    if size > MAX_FILE_SIZE_BYTES:
+        print(
+            f"Error: {path} is {size} bytes; max allowed is {MAX_FILE_SIZE_BYTES}.",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     slides = parse_pptx(path)

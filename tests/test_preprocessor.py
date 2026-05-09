@@ -18,7 +18,7 @@ from doc_preprocessor import (
     parse_pdf,
     parse_pptx,
 )
-from doc_preprocessor.pdf import _is_figure_token_noise
+from doc_preprocessor.pdf import _CAPTION_RE, _is_figure_token_noise
 
 RAW_DIR = Path(__file__).parent.parent / "data" / "raw"
 PDF_PATH = RAW_DIR / "transformer.pdf"
@@ -191,6 +191,41 @@ class TestChunkBlocks:
 # ---------------------------------------------------------------------------
 # PDF figure-token noise filter (B-02)
 # ---------------------------------------------------------------------------
+
+class TestCaptionRegex:
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Figure 1: An illustration of attention.",
+            "Figure 1 An illustration without colon.",
+            "Fig. 2: short caption",
+            "Fig. 2.",
+            "Table 3: results",
+            "Figure A.1: appendix figure",
+            "Figure 1.1: subfigure",
+            "Figure 1A: variant",
+            "Figure\n1: multiline",
+            "圖 1：示意圖",
+            "圖1：示意圖",
+            "表 2：實驗結果",
+        ],
+    )
+    def test_matches_caption(self, text):
+        assert _CAPTION_RE.match(text) is not None, text
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "Body paragraph that mentions figures and tables in passing.",
+            "1.1 Introduction",
+            "figures and tables show useful data",
+            "Figure",
+            "see Figure 1 above",  # has "Figure 1" but not at the start of the block
+        ],
+    )
+    def test_does_not_match_paragraph(self, text):
+        assert _CAPTION_RE.match(text) is None, text
+
 
 class TestFigureTokenNoise:
     def test_short_block_kept(self):

@@ -1,3 +1,16 @@
+# Render deployment manifest for the DocPilot MCP server.
+#
+# Implicit behaviour worth knowing:
+#   * PORT is auto-injected by Render at runtime (typically 10000). server.py
+#     reads it via os.environ.get("PORT", "8000"); do NOT hard-code it here —
+#     Render disallows overriding its assigned port.
+#   * No healthCheckPath is configured. FastMCP's streamable-http endpoint at
+#     /mcp only accepts POST with the MCP Accept header, so a Render GET-based
+#     health probe would return 4xx and mark the service unhealthy. Without
+#     healthCheckPath Render falls back to a TCP-level liveness probe, which
+#     is sufficient for our use case.
+#   * startCommand is omitted on purpose — the Dockerfile's CMD is the source
+#     of truth for how the server boots.
 services:
   - type: web
     name: docpilot-mcp

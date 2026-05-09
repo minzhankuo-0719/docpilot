@@ -16,6 +16,10 @@ sys.path.insert(0, str(ROOT))
 
 from packages.doc_preprocessor.cleaner import clean_text
 
+# Skill safety boundary — text cleaning is cheap but loading a 1 GB file into
+# memory is not.
+MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Clean raw extracted text.")
@@ -33,6 +37,13 @@ def main() -> None:
         path = Path(args.text_file)
         if not path.exists():
             print(f"Error: file not found: {path}", file=sys.stderr)
+            sys.exit(1)
+        size = path.stat().st_size
+        if size > MAX_FILE_SIZE_BYTES:
+            print(
+                f"Error: {path} is {size} bytes; max allowed is {MAX_FILE_SIZE_BYTES}.",
+                file=sys.stderr,
+            )
             sys.exit(1)
         raw = path.read_text(encoding="utf-8")
     else:

@@ -16,9 +16,17 @@ import fitz  # pymupdf
 
 BlockType = Literal["paragraph", "caption", "heading"]
 
-# "Figure 1:", "Fig. 2.", "Table 3:", plus CJK variants.
+# Caption detector. Matches all of:
+#   "Figure 1: An illustration"   "Figure 1 An illustration" (no punctuation)
+#   "Fig. 2."                     "Table 3: results"
+#   "Figure A.1: appendix"        "Figure 1.1: subfigure"   "Figure 1A: variant"
+#   "Figure\n1: multiline"        "圖 1：示意圖"   "圖1：示意圖"
+# The lookahead `(?=[A-Za-z\d.]*\d)` requires at least one digit in the
+# identifier, so paragraphs like "figures and tables show…" don't match.
 _CAPTION_RE = re.compile(
-    r"^\s*(figure|fig\.?|table|圖|表)\s*\d+\s*[:.：。]",
+    r"^\s*(figure|fig\.?|table|圖|表)\s*"
+    r"(?=[A-Za-z\d.]*\d)[A-Za-z\d.]+"
+    r"(\s*[:.：。]|\s+\S)",
     re.IGNORECASE,
 )
 
