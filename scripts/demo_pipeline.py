@@ -31,8 +31,8 @@ from doc_preprocessor import (  # noqa: E402
 
 RAW_DIR = ROOT / "data" / "raw"
 OUT_DIR = ROOT / "data" / "processed" / "demo"
-PDF_PATH = RAW_DIR / "attention.pdf"
-PPTX_PATH = RAW_DIR / "attention_presentation.pptx"
+PDF_PATH = RAW_DIR / "transformer.pdf"
+PPTX_PATH = RAW_DIR / "transformer_presentation.pptx"
 
 # Visual badges so reviewers can see block_type at a glance.
 _TYPE_BADGE = {

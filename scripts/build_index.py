@@ -37,8 +37,8 @@ from packages.doc_preprocessor import (
 PROCESSED_DIR = ROOT / "data" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-PDF_PATH = ROOT / "data" / "raw" / "attention.pdf"
-PPTX_PATH = ROOT / "data" / "raw" / "attention_presentation.pptx"
+PDF_PATH = ROOT / "data" / "raw" / "transformer.pdf"
+PPTX_PATH = ROOT / "data" / "raw" / "transformer_presentation.pptx"
 
 # BM25 tokeniser: lowercase + whitespace split; fast, no NLTK dependency.
 # section is injected into the search text so heading keywords match body chunks.

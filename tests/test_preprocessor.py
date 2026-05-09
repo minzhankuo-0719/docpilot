@@ -21,8 +21,8 @@ from doc_preprocessor import (
 from doc_preprocessor.pdf import _is_figure_token_noise
 
 RAW_DIR = Path(__file__).parent.parent / "data" / "raw"
-PDF_PATH = RAW_DIR / "attention.pdf"
-PPTX_PATH = RAW_DIR / "attention_presentation.pptx"
+PDF_PATH = RAW_DIR / "transformer.pdf"
+PPTX_PATH = RAW_DIR / "transformer_presentation.pptx"
 
 
 # ---------------------------------------------------------------------------
@@ -216,10 +216,10 @@ class TestFigureTokenNoise:
 
 
 # ---------------------------------------------------------------------------
-# PDF parser (integration — requires data/raw/attention.pdf)
+# PDF parser (integration — requires data/raw/transformer.pdf)
 # ---------------------------------------------------------------------------
 
-@pytest.mark.skipif(not PDF_PATH.exists(), reason="attention.pdf not in data/raw")
+@pytest.mark.skipif(not PDF_PATH.exists(), reason="transformer.pdf not in data/raw")
 class TestParsePdf:
     def test_returns_pages(self):
         pages = parse_pdf(PDF_PATH)
@@ -252,14 +252,14 @@ class TestParsePdf:
 
     def test_source_is_filename(self):
         pages = parse_pdf(PDF_PATH)
-        assert pages[0].source == "attention.pdf"
+        assert pages[0].source == "transformer.pdf"
 
 
 # ---------------------------------------------------------------------------
-# PPTX parser (integration — requires data/raw/attention_presentation.pptx)
+# PPTX parser (integration — requires data/raw/transformer_presentation.pptx)
 # ---------------------------------------------------------------------------
 
-@pytest.mark.skipif(not PPTX_PATH.exists(), reason="attention_presentation.pptx not in data/raw")
+@pytest.mark.skipif(not PPTX_PATH.exists(), reason="transformer_presentation.pptx not in data/raw")
 class TestParsePptx:
     def test_returns_slides(self):
         slides = parse_pptx(PPTX_PATH)
@@ -285,4 +285,4 @@ class TestParsePptx:
 
     def test_source_is_filename(self):
         slides = parse_pptx(PPTX_PATH)
-        assert slides[0].source == "attention_presentation.pptx"
+        assert slides[0].source == "transformer_presentation.pptx"
