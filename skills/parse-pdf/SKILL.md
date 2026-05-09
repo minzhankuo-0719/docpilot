@@ -40,13 +40,13 @@ uv run python skills/parse-pdf/scripts/run.py <pdf_path>
 Example:
 
 ```bash
-uv run python skills/parse-pdf/scripts/run.py data/raw/attention.pdf
+uv run python skills/parse-pdf/scripts/run.py data/raw/transformer.pdf
 ```
 
 To save to a file:
 
 ```bash
-uv run python skills/parse-pdf/scripts/run.py data/raw/attention.pdf > data/processed/parsed_pdf.json
+uv run python skills/parse-pdf/scripts/run.py data/raw/transformer.pdf > data/processed/parsed_pdf.json
 ```
 
 ### Notes

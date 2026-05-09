@@ -40,13 +40,13 @@ uv run python skills/parse-pptx/scripts/run.py <pptx_path>
 Example:
 
 ```bash
-uv run python skills/parse-pptx/scripts/run.py data/raw/attention_presentation.pptx
+uv run python skills/parse-pptx/scripts/run.py data/raw/transformer_presentation.pptx
 ```
 
 To save to a file:
 
 ```bash
-uv run python skills/parse-pptx/scripts/run.py data/raw/attention_presentation.pptx > data/processed/parsed_pptx.json
+uv run python skills/parse-pptx/scripts/run.py data/raw/transformer_presentation.pptx > data/processed/parsed_pptx.json
 ```
 
 ### Notes

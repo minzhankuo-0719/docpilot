@@ -35,7 +35,7 @@ uv run python skills/clean-text/scripts/run.py --text "atten-\ntion mech-\nanism
 Clean from stdin (e.g. piped from parse-pdf):
 
 ```bash
-uv run python skills/parse-pdf/scripts/run.py data/raw/attention.pdf \
+uv run python skills/parse-pdf/scripts/run.py data/raw/transformer.pdf \
   | python -c "import json,sys; print('\n\n'.join(p['text'] for p in json.load(sys.stdin)))" \
   | uv run python skills/clean-text/scripts/run.py --stdin
 ```

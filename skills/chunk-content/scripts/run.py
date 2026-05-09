@@ -75,7 +75,7 @@ def main() -> None:
     input_group = parser.add_mutually_exclusive_group(required=True)
     input_group.add_argument("--input", metavar="TEXT_FILE", help="Plain text file to chunk")
     input_group.add_argument("--json", metavar="JSON_FILE", help="Parsed JSON from parse-pdf/parse-pptx")
-    parser.add_argument("--doc-id", required=True, help="Document identifier (e.g. 'attention')")
+    parser.add_argument("--doc-id", required=True, help="Document identifier (e.g. 'transformer')")
     parser.add_argument("--source", help="Source filename (required for --input mode)")
     parser.add_argument("--max-words", type=int, default=220, help="Target chunk size in words")
     parser.add_argument("--overlap", type=int, default=1, help="Sentences of overlap between chunks")

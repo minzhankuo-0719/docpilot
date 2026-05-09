@@ -58,12 +58,12 @@ JSON array of chunks printed to stdout:
 
 ```bash
 # 1. Parse
-uv run python skills/parse-pdf/scripts/run.py data/raw/attention.pdf > /tmp/parsed.json
+uv run python skills/parse-pdf/scripts/run.py data/raw/transformer.pdf > /tmp/parsed.json
 
 # 2. Chunk from parsed JSON
 uv run python skills/chunk-content/scripts/run.py \
   --json /tmp/parsed.json \
-  --doc-id attention \
+  --doc-id transformer \
   --pretty
 ```
 
