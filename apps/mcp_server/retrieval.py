@@ -175,9 +175,7 @@ class KnowledgeBase:
                     "chunk_count": 0,
                 }
             summary[doc_id]["chunk_count"] += 1
-        docs = list(summary.values())
-        docs.append({"search_mode": self.search_mode})
-        return docs
+        return list(summary.values())
 
     @staticmethod
     def _make_result(chunk: dict[str, Any], score: float) -> SearchResult:
