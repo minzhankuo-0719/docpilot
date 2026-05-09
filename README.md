@@ -119,6 +119,29 @@ uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
 
 - **B-01**：PDF 第 14–15 頁的視覺化範例圖內嵌大量重複文字（如 `The Law will never be perfect ...`），BM25 純詞頻計分會把這些噪音 chunk 排到高位。緩解方案是 hybrid search（embedding 對語意敏感），但目前遠端僅有 BM25，因此這個 retrieval bias 仍存在。本機啟用 Voyage embedding 後可顯著降低其影響。
 
+## Task Completion Checklist
+
+### Task 1 — Unstructured Data Pipeline & Remote MCP Server
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/transformer.pdf` (15 pages) + `data/raw/transformer_presentation.pptx` |
+| Extract, clean, and chunk content | ✅ | `packages/doc_preprocessor/` — block-level parse → paragraph-aware clean → sentence-boundary chunk |
+| Searchable knowledge base | ✅ | `data/processed/chunks.jsonl` + BM25 index; hybrid BM25 + Voyage AI embedding when `VOYAGE_API_KEY` is set |
+| Remote MCP Server with tools | ✅ | FastMCP server exposing `search`, `get_chunk`, `list_documents` via Streamable HTTP |
+| LLM agent can connect and query | ✅ | Claude Desktop connects via `mcp-remote`; custom test client in `tests/mcp_client.py` |
+| Verifiable outputs | ✅ | `uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp` — 5/5 tests pass |
+
+### Task 2 — Data Preprocessing as Claude Skills
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Reusable Skills for PDF parsing, PPTX parsing, text cleaning, structured formatting | ✅ | `parse-pdf`, `parse-pptx`, `clean-text`, `chunk-content` — four independent skills |
+| Clear inputs/outputs | ✅ | Each skill has a `SKILL.md` documenting accepted arguments and output schema; results auto-saved to `data/processed/` with path printed on completion |
+| Safe execution boundary | ✅ | Each skill enforces `MAX_FILE_SIZE_BYTES` and hard-cap validation before processing |
+| Easily installed and invoked by Claude Code | ✅ | One `cp -r` per skill to install; invoked by natural language in Claude Code (see Skills section above) |
+| Verifiable outputs | ✅ | Output files written to `data/processed/` on every run; e.g. `transformer_parsed.json`, `transformer_chunks.json` |
+
 ## AI 協作工作流程
 
 詳見 [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md)。
