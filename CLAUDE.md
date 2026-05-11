@@ -1,16 +1,14 @@
-# docpilot — 瑞鼎科技 take-home task
+# docpilot — Raydium AI Engineer Take-Home
 
-## 一、專案脈絡
+## Project Context
 
-- **應徵職務**：瑞鼎科技（Raydium）AI 應用程式開發工程師
-- **應徵者**：minzhankuo（GitHub: `minzhankuo-0719`）
-- **Repo**：`github.com/minzhankuo-0719/docpilot`
-- **溝通語言**：繁體中文
+- **Role applied**: AI Application Engineer at Raydium
+- **Candidate**: minzhankuo (GitHub: `minzhankuo-0719`)
+- **Repo**: `github.com/minzhankuo-0719/docpilot`
 
-## 二、原作業要求（信件原文）
+## Assignment Requirements
 
-> For this interview, please complete the take-home task(s) below by the day before your interview and share your deliverables.
-> Please complete at least one task. Completing more than one is a plus.
+> Complete the take-home task(s) below by the day before your interview. Please complete at least one task. Completing more than one is a plus.
 
 ### Task 1 — Unstructured Data Pipeline & Remote MCP Server
 
@@ -20,50 +18,50 @@ Build a data processing pipeline that ingests simulated, messy enterprise docume
 
 Package the unstructured data preprocessing capabilities (like parsing PDFs or PPTX files, cleaning text, and structured formatting) into reusable Skills. Ensure that these Skills have clear inputs/outputs, a safe execution boundary, and can be easily installed and invoked by Claude Code. Provide verifiable outputs (e.g., run logs, terminal screenshots, or a recorded demo showing Claude Code successfully executing the Skill). Skills reference (optional): https://kaochenlong.com/claude-code-skills
 
-### Task 3 — Browser automation agent task （**本專案不做**）
+### Task 3 — Browser automation agent task (**not in scope for this project**)
 
-### Requirements（硬性指標）
+### Requirements
 
-- **AI-only workflow**：Complete the work using AI coding tools or an agent workflow (Claude Code preferred). Using Skills is a plus.
-- **Git evidence**：Provide a repo with meaningful commit history that reflects your process.
-- **Deploy online**：Deploy to a public URL (e.g., Zeabur or equivalent).
-- **Documentation**：Include a short README with how to run/verify, key assumptions, and how you used the AI/agent workflow.
-- **No confidential material**：Use only public or self-created code/data.
+- **AI-only workflow**: Complete the work using AI coding tools or an agent workflow (Claude Code preferred). Using Skills is a plus.
+- **Git evidence**: Provide a repo with meaningful commit history that reflects your process.
+- **Deploy online**: Deploy to a public URL (e.g., Zeabur or equivalent).
+- **Documentation**: Include a short README with how to run/verify, key assumptions, and how you used the AI/agent workflow.
+- **No confidential material**: Use only public or self-created code/data.
 
-## 三、已鎖定的決策
+## Architecture Decisions
 
-| 項目 | 決定 |
+| Item | Decision |
 |---|---|
-| 範圍 | 合併實作 **Task 1 + Task 2**，不做 Task 3 |
-| 共用核心 | `packages/doc_preprocessor`（PDF/PPTX 解析、清洗、切塊） |
-| 程式語言 | Python 3.11+ |
-| 套件管理 | `uv` |
-| PDF 解析 | `pymupdf` |
-| PPTX 解析 | `python-pptx` |
-| MCP framework | FastMCP（官方 Python SDK） |
+| Scope | Task 1 + Task 2 combined; Task 3 skipped |
+| Shared core | `packages/doc_preprocessor` (PDF/PPTX parse, clean, chunk) |
+| Language | Python 3.11+ |
+| Package manager | `uv` |
+| PDF parsing | `pymupdf` |
+| PPTX parsing | `python-pptx` |
+| MCP framework | FastMCP (official Python SDK) |
 | MCP transport | Streamable HTTP |
-| 檢索策略 | Hybrid（BM25 + Voyage AI embedding），fallback 到純 BM25 |
-| 部署平台 | **Render**（免費 tier，Docker 部署）|
-| MCP 驗證 | Claude Desktop 連線 + 自製 test client 腳本 |
+| Retrieval | Hybrid (BM25 + Voyage AI embeddings), falls back to BM25-only |
+| Deployment | **Render** (free tier, Docker) |
+| MCP verification | Claude Desktop + custom `mcp_client.py` test script |
 
-## 四、來源資料
+## Source Data
 
-- **PDF**：`/Users/kevin/Downloads/Papers/Attention Is All You Need.pdf` → commit 為 `data/raw/transformer.pdf`
-- **PPTX**：`/Users/kevin/Downloads/Attention_Is_All_You_Need_Presentation.pptx` → commit 為 `data/raw/transformer_presentation.pptx`
-  
-## 五、階段計畫
+- **PDF**: `data/raw/transformer.pdf` — "Attention Is All You Need" (15 pages)
+- **PPTX**: `data/raw/transformer_presentation.pptx` — companion slide deck
 
-| # | 階段 | 主要產出 | 驗證方式 |
+## Stage Plan
+
+| # | Stage | Output | Verification |
 |---|---|---|---|
-| 0 | Repo 初始化 | 目錄結構、`pyproject.toml`、CLAUDE.md、README skeleton、`.gitignore`、GitHub remote | repo 公開可見 |
-| 1 | `doc_preprocessor` library | PDF/PPTX parser、cleaner、chunker + 單元測試 | `pytest` 通過 |
-| 2 | 索引建構 | chunks JSONL + BM25 索引 | `python scripts/build_index.py` |
-| 3 | MCP Server | FastMCP tools：`search`、`get_chunk`、`list_documents` + test client | `python tests/mcp_client.py` 看到回傳 |
-| 4 | Claude Skills | `parse-pdf`、`parse-pptx`、`clean-text`、`chunk-content` 共 4 個 skill | Claude Code 載入後可呼叫 |
-| 5 | Render 部署 | Dockerfile + 公開 URL | 主管打開 URL 能連到 MCP server |
-| 6 | Demo + 文件收尾 | README 完整化、`docs/AI_WORKFLOW.md` 完整化 | 整體可重現 |
+| 0 | Repo initialisation | Directory structure, `pyproject.toml`, `.gitignore`, GitHub remote | Repo publicly visible |
+| 1 | `doc_preprocessor` library | PDF/PPTX parser, cleaner, chunker + unit tests | `pytest` passes |
+| 2 | Index build | `chunks.jsonl` + BM25 index | `python scripts/build_index.py` |
+| 3 | MCP Server | FastMCP tools: `search`, `get_chunk`, `list_documents` + test client | `python tests/mcp_client.py` returns results |
+| 4 | Claude Skills | `parse-pdf`, `parse-pptx`, `clean-text`, `chunk-content` | Invocable from Claude Code |
+| 5 | Render deployment | Dockerfile + public URL | URL reachable, MCP tools respond |
+| 6 | Demo + docs | Complete README, `docs/AI_WORKFLOW.md` | Fully reproducible |
 
-## 六、目錄結構
+## Directory Structure
 
 ```
 raydium-takehome/
@@ -101,55 +99,37 @@ raydium-takehome/
     └── AI_WORKFLOW.md
 ```
 
-## 七、目前進度
+## Current Progress
 
-| Stage | 狀態 | 產出與備注 |
+All stages complete. Remote MCP server is live at `https://docpilot-5hht.onrender.com`. `mcp_client.py` passes 5/5 both locally and against the remote deployment.
+
+| Stage | Status | Notes |
 |---|---|---|
-| 0 — Repo 初始化 | ✅ 完成 | 目錄結構、`pyproject.toml`、`.gitignore`、GitHub remote |
-| 1 — `doc_preprocessor` library | ✅ 完成 | v2：block-level parse + 段落感知 clean + sentence-aware chunk；`pytest` 通過 |
-| 1.5 — `scripts/demo_pipeline.py` 視覺化驗證 | ✅ 完成 | `data/processed/query_results.md` 有輸出結果 |
-| 2 — 索引建構 | ✅ 完成 | `data/processed/chunks.jsonl`、`bm25_index.pkl`、`bm25_corpus.pkl` 已產出；`scripts/build_index.py` 可重跑 |
-| 3 — MCP Server | ✅ 完成 | `server.py` + `retrieval.py` 已驗證；`mcp_client.py` 5/5 通過；`Dockerfile` 已補齊 |
-| 4 — Claude Skills | ✅ 完成 | `parse-pdf`、`parse-pptx`、`clean-text`、`chunk-content` 各含 `SKILL.md` + `scripts/run.py`；全部驗證通過；已安裝至 `~/.claude/skills/` |
-| 5 — Render 部署 | ✅ 完成 | `https://docpilot-5hht.onrender.com`；`mcp_client.py` 遠端測試 5/5 通過 |
-| 6 — Demo + 文件收尾 | ✅ 完成 | README 補完；`docs/AI_WORKFLOW.md` Stage 2–6 完整；所有改動已 commit + push |
+| 0 — Repo init | ✅ | Directory structure, `pyproject.toml`, `.gitignore`, GitHub remote |
+| 1 — `doc_preprocessor` | ✅ | v2: block-level parse + paragraph-aware clean + sentence-aware chunk; `pytest` passes |
+| 2 — Index build | ✅ | `chunks.jsonl`, `bm25_index.pkl`, `bm25_corpus.pkl` generated |
+| 3 — MCP Server | ✅ | `server.py` + `retrieval.py` verified; `mcp_client.py` 5/5; `Dockerfile` complete |
+| 4 — Claude Skills | ✅ | All 4 skills with `SKILL.md` + `scripts/run.py`; installed to `~/.claude/skills/` |
+| 5 — Render deploy | ✅ | `https://docpilot-5hht.onrender.com`; remote test 5/5 |
+| 6 — Demo + docs | ✅ | README complete; `docs/AI_WORKFLOW.md` stages 2–6 documented |
 
-**doc_preprocessor v2 重點**：
-- `Block` dataclass + `block_type ∈ {paragraph, caption, heading}`
-- PDF 用 PyMuPDF `get_text("blocks")` 抓段落，regex 識別 figure/table caption
-- PPTX 把 title placeholder 標為 `heading`
-- `clean_text` 以 `\n\n` 為段落分隔保留語意；`clean_block_text` 處理單一 block
-- `chunk_blocks` 讓 caption/heading 獨立成 chunk，paragraph 以 sentence boundary 切並做 sentence-level overlap
-- 預處理結果：PDF 15 頁 → 48 chunks（B-02 noise filter 後）；PPTX → 68 chunks
+**doc_preprocessor v2 highlights**:
+- `Block` dataclass with `block_type ∈ {paragraph, caption, heading}`
+- PDF: PyMuPDF `get_text("blocks")` + regex caption detection (`Figure|Fig|Table`)
+- PPTX: title placeholder (`placeholder_format.idx == 0`) tagged as `heading`
+- `chunk_blocks`: captions/headings → standalone chunks; paragraphs → sentence-boundary split with one-sentence overlap
+- Results: PDF 15 pages → 48 chunks; PPTX → 68 chunks
 
-**目前狀態**：Stage 0–6 全部完成；遠端 MCP server 已上線於 Render，`mcp_client.py` 本機與遠端皆 5/5 通過。
+## Known Issues
 
-## 七之一、待修復 Bug
+| # | Issue | Root cause | Status |
+|---|---|---|---|
+| B-01 | Visualisation figure text scores high in BM25 | Pages 14–15 embed repeated token strings; BM25 rewards term frequency | Recorded as known limitation in README; Voyage hybrid search mitigates locally |
+| B-02 | Figure-embedded tokens parsed as body text | PyMuPDF cannot distinguish figure text from body text | Fixed: `_is_figure_token_noise` drops blocks with >10 lines and <3 words/line average |
 
-| # | 問題 | 現象 | 根本原因 | 狀態 |
-|---|---|---|---|---|
-| B-01 | PDF 視覺化範例圖被解析為高分 chunk | Query 2/4/5 的 Rank 1-2 都是 `The Law will never be perfect...` 這串字元間有大量空白的噪音內容，佔據高位 | PDF 第 14-15 頁的翻譯視覺化圖內嵌大量重複文字，BM25 只看詞頻不懂語意，長 chunk 得分虛高 | **已記錄為 known limitation（README）**。本機啟用 Voyage hybrid search 可緩解；遠端純 BM25 仍受影響 |
-| B-02 | Figure 內嵌 token 文字被當作正文解析 | PDF 圖片中每個 token 獨佔一行，被 PyMuPDF 抽取為單詞斷行文字，混入正文 chunk | PyMuPDF `get_text("blocks")` 無法區分 figure 內文字與正文 | **已修復**。`pdf.py` 加入 `_is_figure_token_noise`（行數 > 10 且平均每行字數 < 3 即丟棄），單元測試覆蓋 4 case；PDF chunks 從 50 → 48 |
+## Collaboration Conventions
 
-## 八、待做清單（Backlog）
-
-### 座標感知 chunking
-
-**背景**：目前 `pdf.py` 用 `get_text("blocks")` 抓文字，表格的欄列結構會消失。測試中查詢 Table 2 時，MCP 只能回傳 caption 與提及表格的段落，無法回傳結構化表格內容。
-
-| # | 功能 | 改動位置 | 做法 | 優先度 |
-|---|---|---|---|---|
-| T-01 | `page.find_tables()` 表格偵測 | `packages/doc_preprocessor/pdf.py` | 每頁用 `find_tables()` 偵測表格區域，轉成 Markdown table 字串，標記 `block_type="table"` 插入 blocks | 高 |
-| T-02 | 雙欄排序修正 | `packages/doc_preprocessor/pdf.py` | 依 `x0` 判斷左/右欄，各自 `y0` 排序後合併，修正閱讀順序 | 中 |
-| T-03 | 空間鄰近 chunk 群組 | `chunker.py` 或 `pdf.py` | `y0` 相近的 blocks 視為同一視覺群組，不跨群組合併 chunk | 低 |
-
-**前提**：T-01 需確認 PyMuPDF 版本 ≥ 1.23.0（`find_tables()` 才有支援）。
-
----
-
-## 九、協作慣例
-
-- 每完成一個 stage 才 commit + push，commit message 要有意義
-- 每次跑 Bash 指令前先用 1-2 句話說明在做什麼、為什麼現在跑
-- 任何架構級決定先跟 minzhankuo 確認，不要自己改方向
-- `docs/AI_WORKFLOW.md` 是作業靈魂，每個 stage 都要補充 AI 協作紀錄
+- Commit + push only after completing a full stage; commit messages must be meaningful
+- Briefly explain what a Bash command does and why before running it
+- Confirm any architecture-level decisions before changing direction
+- `docs/AI_WORKFLOW.md` is the primary AI collaboration record — update it at each stage
