@@ -87,31 +87,6 @@ The screenshot below shows all four skills being invoked by Claude Code in a sin
 
 ---
 
-## Task Completion Checklist
-
-### Task 1 — Unstructured Data Pipeline & Remote MCP Server
-
-| Requirement | Status | Evidence |
-|---|---|---|
-| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/transformer.pdf` (15 pages) + `data/raw/transformer_presentation.pptx` |
-| Extract, clean, and chunk content | ✅ | `packages/doc_preprocessor/` — block-level parse → paragraph-aware clean → sentence-boundary chunk |
-| Searchable knowledge base | ✅ | `data/processed/chunks.jsonl` + BM25 index; hybrid BM25 + Voyage AI when `VOYAGE_API_KEY` is set |
-| Remote MCP Server with tools | ✅ | FastMCP server exposing `search`, `get_chunk`, `list_documents` via Streamable HTTP |
-| LLM agent can connect and query | ✅ | Claude Desktop connects via `mcp-remote`; custom test client in `tests/mcp_client.py` |
-| Verifiable outputs | ✅ | `uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp` — 5/5 tests pass |
-
-### Task 2 — Data Preprocessing as Claude Skills
-
-| Requirement | Status | Evidence |
-|---|---|---|
-| Reusable Skills for PDF/PPTX parsing, text cleaning, structured formatting | ✅ | `parse-pdf`, `parse-pptx`, `clean-text`, `chunk-content` — four independent skills |
-| Clear inputs/outputs | ✅ | Each skill has a `SKILL.md` documenting accepted arguments and output schema |
-| Safe execution boundary | ✅ | Each skill enforces `MAX_FILE_SIZE_BYTES` hard-cap validation before processing |
-| Easily installed and invoked by Claude Code | ✅ | One `cp -r` per skill to install; invoked by natural language in Claude Code |
-| Verifiable outputs | ✅ | Output files written to `data/processed/` on every run |
-
----
-
 ## Getting Started
 
 **Prerequisites:** Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), and optionally a `VOYAGE_API_KEY` (enables hybrid BM25 + Voyage AI search; falls back to pure BM25 without it).
@@ -206,6 +181,31 @@ The entire project was built using **Claude Code** as the primary coding agent. 
 
 ---
 
+## Task Completion Checklist
+
+### Task 1 — Unstructured Data Pipeline & Remote MCP Server
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/transformer.pdf` (15 pages) + `data/raw/transformer_presentation.pptx` |
+| Extract, clean, and chunk content | ✅ | `packages/doc_preprocessor/` — block-level parse → paragraph-aware clean → sentence-boundary chunk |
+| Searchable knowledge base | ✅ | `data/processed/chunks.jsonl` + BM25 index; hybrid BM25 + Voyage AI when `VOYAGE_API_KEY` is set |
+| Remote MCP Server with tools | ✅ | FastMCP server exposing `search`, `get_chunk`, `list_documents` via Streamable HTTP |
+| LLM agent can connect and query | ✅ | Claude Desktop connects via `mcp-remote`; custom test client in `tests/mcp_client.py` |
+| Verifiable outputs | ✅ | `uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp` — 5/5 tests pass |
+
+### Task 2 — Data Preprocessing as Claude Skills
+
+| Requirement | Status | Evidence |
+|---|---|---|
+| Reusable Skills for PDF/PPTX parsing, text cleaning, structured formatting | ✅ | `parse-pdf`, `parse-pptx`, `clean-text`, `chunk-content` — four independent skills |
+| Clear inputs/outputs | ✅ | Each skill has a `SKILL.md` documenting accepted arguments and output schema |
+| Safe execution boundary | ✅ | Each skill enforces `MAX_FILE_SIZE_BYTES` hard-cap validation before processing |
+| Easily installed and invoked by Claude Code | ✅ | One `cp -r` per skill to install; invoked by natural language in Claude Code |
+| Verifiable outputs | ✅ | Output files written to `data/processed/` on every run |
+
+---
+
 ## Project Structure
 
 ```
@@ -254,6 +254,7 @@ See [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md) for a detailed log covering:
 
 | # | Feature | Description |
 |---|---|---|
-| T-01 | Table extraction | Use `page.find_tables()` (PyMuPDF ≥ 1.23) to detect table regions and convert them to Markdown, preserving column/row structure as a `table` block type |
-| T-02 | Two-column layout fix | Sort blocks by `x0` to detect left/right columns, then merge in correct reading order |
-| T-03 | Spatial chunk grouping | Group blocks with similar `y0` coordinates into visual units to avoid merging content across section breaks |
+| T-01 | Image & figure understanding | docpilot currently skips embedded images and figures entirely — it can only extract text. A multimodal model (e.g. Claude with vision) would be needed to describe charts, architecture diagrams, and slide visuals so they become searchable content |
+| T-02 | Table extraction | Use `page.find_tables()` (PyMuPDF ≥ 1.23) to detect table regions and convert them to Markdown, preserving column/row structure as a `table` block type |
+| T-03 | Broader document compatibility | The current parser is optimised for structured academic documents (e.g. conference papers) where figures and tables follow consistent labelling conventions (`Figure 1`, `Table 2`). Applying docpilot to other document types — contracts, reports, slide decks without captions — would require more robust parsing, cleaning, and chunking logic |
+| T-04 | Production-grade deployment | The current Render free tier has a cold-start delay of ~30 seconds after inactivity. Upgrading to a paid tier or an always-on host (e.g. Railway, Fly.io) would eliminate this and make the server suitable for real-time use |
