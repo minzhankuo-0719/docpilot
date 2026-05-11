@@ -48,8 +48,8 @@ Package the unstructured data preprocessing capabilities (like parsing PDFs or P
 
 ## 四、來源資料
 
-- **PDF**：`/Users/kevin/Downloads/Papers/Attention Is All You Need.pdf` → commit 為 `data/raw/attention.pdf`
-- **PPTX**：`/Users/kevin/Downloads/Attention_Is_All_You_Need_Presentation.pptx` → commit 為 `data/raw/attention_presentation.pptx`
+- **PDF**：`/Users/kevin/Downloads/Papers/Attention Is All You Need.pdf` → commit 為 `data/raw/transformer.pdf`
+- **PPTX**：`/Users/kevin/Downloads/Attention_Is_All_You_Need_Presentation.pptx` → commit 為 `data/raw/transformer_presentation.pptx`
   
 ## 五、階段計畫
 

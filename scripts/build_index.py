@@ -2,8 +2,8 @@
 
 Reads
 -----
-  data/raw/attention.pdf
-  data/raw/attention_presentation.pptx
+  data/raw/transformer.pdf
+  data/raw/transformer_presentation.pptx
 
 Writes
 ------
@@ -51,7 +51,7 @@ def _build_pdf_chunks() -> list[Chunk]:
     print(f"[PDF] parsing {PDF_PATH.name} …")
     pages = parse_pdf(PDF_PATH)
     chunks: list[Chunk] = []
-    doc_id = PDF_PATH.stem  # "attention"
+    doc_id = PDF_PATH.stem  # "transformer"
     for page in pages:
         cleaned_blocks = []
         for block in page.blocks:
@@ -76,7 +76,7 @@ def _build_pptx_chunks() -> list[Chunk]:
     print(f"[PPTX] parsing {PPTX_PATH.name} …")
     slides = parse_pptx(PPTX_PATH)
     chunks: list[Chunk] = []
-    doc_id = PPTX_PATH.stem  # "attention_presentation"
+    doc_id = PPTX_PATH.stem  # "transformer_presentation"
     for slide in slides:
         cleaned_blocks = []
         for block in slide.blocks:

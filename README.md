@@ -53,7 +53,7 @@ uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/attention.pdf` (15 pages) + `data/raw/attention_presentation.pptx` |
+| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/transformer.pdf` (15 pages) + `data/raw/transformer_presentation.pptx` |
 | Extract, clean, and chunk content | ✅ | `packages/doc_preprocessor/` — block-level parse → paragraph-aware clean → sentence-boundary chunk |
 | Searchable knowledge base | ✅ | `data/processed/chunks.jsonl` + BM25 index; hybrid BM25 + Voyage AI when `VOYAGE_API_KEY` is set |
 | Remote MCP Server with tools | ✅ | FastMCP server exposing `search`, `get_chunk`, `list_documents` via Streamable HTTP |
@@ -88,7 +88,7 @@ uv run python apps/mcp_server/server.py
 # → http://localhost:8000/mcp
 
 # 4. Run all tests
-uv run pytest                          # 46 unit tests
+uv run pytest                          # 56 unit tests
 uv run python tests/mcp_client.py      # MCP integration, 5/5
 ```
 
@@ -103,7 +103,7 @@ cp -r skills/chunk-content  ~/.claude/skills/
 
 After installing, invoke any skill with natural language inside Claude Code — for example:
 
-> "Parse data/raw/attention.pdf"
+> "Parse data/raw/transformer.pdf"
 
 Results are auto-saved to `data/processed/` and the output path is printed on completion.
 
@@ -179,10 +179,10 @@ docpilot/
 │   ├── build_index.py           builds chunks.jsonl + BM25/embedding index
 │   └── demo_pipeline.py         visual pipeline walkthrough → data/processed/demo/
 ├── tests/
-│   ├── test_preprocessor.py     46 unit tests
+│   ├── test_preprocessor.py     56 unit tests
 │   └── mcp_client.py            MCP integration test (5 assertions)
 ├── data/
-│   ├── raw/                     attention.pdf + attention_presentation.pptx
+│   ├── raw/                     transformer.pdf + transformer_presentation.pptx
 │   └── processed/               chunks.jsonl, BM25 index files
 └── docs/AI_WORKFLOW.md          stage-by-stage AI collaboration log
 ```

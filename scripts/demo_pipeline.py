@@ -214,7 +214,7 @@ def main() -> None:
 
         print("[3/6] 切塊 PDF…")
         write_chunks(
-            pdf_cleaned, doc_id="attention_pdf",
+            pdf_cleaned, doc_id="transformer_pdf",
             source_name=PDF_PATH.name,
             out=OUT_DIR / "chunks_pdf.md",
             label="PDF",
@@ -234,7 +234,7 @@ def main() -> None:
 
         print("[6/6] 切塊 PPTX…")
         write_chunks(
-            pptx_cleaned, doc_id="attention_pptx",
+            pptx_cleaned, doc_id="transformer_pptx",
             source_name=PPTX_PATH.name,
             out=OUT_DIR / "chunks_pptx.md",
             label="PPTX",
