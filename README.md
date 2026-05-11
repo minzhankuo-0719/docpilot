@@ -1,12 +1,21 @@
-# docpilot
+<p align="center">
+  <img src="docs/docpilot-logo.png" width="180" alt="docpilot logo"/>
+</p>
 
-> Unstructured document pipeline · Remote MCP Server · Claude Code Skills
+<h1 align="center">docpilot</h1>
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![uv](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
-[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-5e6ad2)](https://modelcontextprotocol.io/)
-[![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-D97757)](https://claude.com/claude-code)
-[![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7.svg)](https://docpilot-5hht.onrender.com)
+<p align="center">
+  <strong>Turn messy enterprise documents into a queryable knowledge base.</strong><br/>
+  <em>Unstructured document pipeline · Remote MCP Server · Claude Code Skills</em>
+</p>
+
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11%2B-blue.svg" alt="Python 3.11+"/></a>
+  <a href="https://docs.astral.sh/uv/"><img src="https://img.shields.io/badge/package%20manager-uv-DE5FE9" alt="uv"/></a>
+  <a href="https://modelcontextprotocol.io/"><img src="https://img.shields.io/badge/MCP-Model%20Context%20Protocol-5e6ad2" alt="MCP"/></a>
+  <a href="https://claude.com/claude-code"><img src="https://img.shields.io/badge/built%20with-Claude%20Code-D97757" alt="Built with Claude Code"/></a>
+  <a href="https://docpilot-5hht.onrender.com"><img src="https://img.shields.io/badge/deploy-Render-46E3B7.svg" alt="Deploy: Render"/></a>
+</p>
 
 ---
 
