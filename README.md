@@ -1,123 +1,51 @@
 # docpilot
 
-Raydium AI 應用工程師 take-home task — Task 1 (MCP Server) + Task 2 (Claude Skills)。
+> Unstructured document pipeline · Remote MCP Server · Claude Code Skills
 
-## 專案簡介
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7.svg)](https://docpilot-5hht.onrender.com)
 
-以「Attention Is All You Need」論文 PDF 與簡報 PPTX 為原始資料，建構：
+---
 
-1. **文件預處理 pipeline**：解析 → 清洗 → 切塊 → 索引（BM25 + Voyage AI embedding）
-2. **遠端 MCP Server**：透過 FastMCP 暴露 `search`、`get_chunk`、`list_documents` 工具，供 LLM agent 查詢
-3. **Claude Skills**：將預處理能力封裝為可安裝的 Skills（`parse-pdf`、`parse-pptx`、`clean-text`、`chunk-content`）
+## Assignment
 
-## 快速開始
+This project completes **Task 1** and **Task 2** from the Raydium AI Engineer take-home:
 
-```bash
-# 安裝依賴（需要 uv）
-uv sync
-```
+**Task 1 — Unstructured Data Pipeline & Remote MCP Server**
 
-## 視覺化 Pipeline 輸出（推薦先從這裡開始）
+> Build a data processing pipeline that ingests simulated, messy enterprise documents (e.g., a multi-page PDF containing tables/headers, and a PPTX slide deck). The script must extract, clean, and appropriately chunk the content. Next, package this searchable knowledge base into a remote Model Context Protocol (MCP) server. Expose specific tools or resources via the MCP server so that a standard LLM agent (e.g., Claude Desktop or a custom agent script) can connect and query the extracted information. Provide verifiable outputs (e.g., an MCP client test script, example queries, or server logs proving successful data retrieval).
 
-執行以下指令，會依序跑完 parse → clean → chunk，並將每個階段的結果寫成 Markdown 檔案到 `data/processed/demo/`：
+**Task 2 — Data Preprocessing as Claude Skills**
 
-```bash
-uv run python scripts/demo_pipeline.py
-```
+> Package the unstructured data preprocessing capabilities (like parsing PDFs or PPTX files, cleaning text, and structured formatting) into reusable Skills. Ensure that these Skills have clear inputs/outputs, a safe execution boundary, and can be easily installed and invoked by Claude Code. Provide verifiable outputs (e.g., run logs, terminal screenshots, or a recorded demo showing Claude Code successfully executing the Skill).
 
-產生的檔案：
+---
 
-| 檔案 | 內容 |
-|---|---|
-| `data/processed/demo/parse_pdf.md` | PDF 每頁的 **Block 列表**，每個 block 標註 `paragraph` / `caption` / `heading` |
-| `data/processed/demo/parse_pptx.md` | PPTX 每張投影片的 Block 列表（含 title heading 識別）|
-| `data/processed/demo/clean_pdf.md` | 段落感知清洗結果（每個 block 獨立清洗，段落界線保留）|
-| `data/processed/demo/clean_pptx.md` | PPTX 清洗結果 |
-| `data/processed/demo/chunks_pdf.md` | PDF 切塊結果（max 220 words，overlap 1 sentence；caption 獨立成 chunk）|
-| `data/processed/demo/chunks_pptx.md` | PPTX 切塊結果 |
+## Demo & Verification
 
-### 預處理 pipeline 設計重點
+### Video walkthrough
 
-- **Block-level parsing**：PDF 用 PyMuPDF `get_text("blocks")` 抓 paragraph block；PPTX 用每個 `text_frame.paragraphs` 當 block。每個 block 帶 `block_type`，並用 regex `^(Figure|Fig\.?|Table|圖|表)\s*\d+[:.]` 識別 caption。
-- **段落感知清洗**：`clean_text` 以 `\n\n` 切段落、各自清洗、再組回去。Block 內的行內換行 → 空白；段落界線保留。
-- **語意切塊**：caption / heading **獨立成 chunk**（不會被混入內文）；paragraph 依字數打包；超大段落以 sentence boundary `[.!?。！？]` 拆分；body chunk 之間以 sentence-level overlap 銜接。
+<!-- TODO: paste Loom / YouTube link here -->
+> 📹 [Watch demo](https://...)  *(Task 1: MCP client 5/5 pass · Task 2: Claude Code invoking Skills)*
 
-## Claude Skills（Task 2）
+### MCP Server — remote test (Task 1)
 
-四個 skill 封裝了文件預處理各階段的能力，可在 Claude Code 中直接呼叫。
-
-| Skill | 功能 | 預設輸出路徑 |
-|---|---|---|
-| `parse-pdf` | 解析 PDF → 結構化 blocks JSON | `data/processed/<stem>_parsed.json` |
-| `parse-pptx` | 解析 PPTX → 結構化 blocks JSON | `data/processed/<stem>_parsed.json` |
-| `clean-text` | 清洗原始文字（修復 soft-hyphen、換行等） | `data/processed/<stem>_cleaned.txt` |
-| `chunk-content` | 切塊供 RAG 使用（含 sentence-level overlap） | `data/processed/<doc-id>_chunks.json` |
-
-### 安裝 Skills
+Run the test client against the live Render deployment:
 
 ```bash
-# 從專案根目錄執行，複製四個 skill 到 Claude Code 的 skills 目錄
-cp -r skills/parse-pdf   ~/.claude/skills/
-cp -r skills/parse-pptx  ~/.claude/skills/
-cp -r skills/clean-text  ~/.claude/skills/
-cp -r skills/chunk-content ~/.claude/skills/
+uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp
 ```
 
-安裝後在 Claude Code 對話中即可直接呼叫，例如：
+<!-- TODO: replace with actual screenshot -->
+![MCP client 5/5 pass](docs/screenshots/mcp_client_pass.png)
 
-> 「幫我解析 data/raw/transformer.pdf」
+### Claude Code Skills — invocation (Task 2)
 
-結果會自動寫入 `data/processed/transformer_parsed.json`，並顯示：
+<!-- TODO: replace with actual screenshot -->
+![Claude Code invoking parse-pdf skill](docs/screenshots/skill_parse_pdf.png)
 
-```
-Output saved to: /your/project/data/processed/transformer_parsed.json
-```
-
-如需自訂輸出路徑，加上 `--output` 參數：
-
-```bash
-uv run python skills/parse-pdf/scripts/run.py data/raw/transformer.pdf --output my_output.json
-```
-
-## 執行單元測試
-
-```bash
-uv run pytest
-```
-
-35 個測試涵蓋 cleaner / chunker / chunk_blocks / parse_pdf / parse_pptx，包含 caption isolation、paragraph preservation、sentence overlap 等行為驗證。
-
-## 建構索引與啟動 MCP Server
-
-```bash
-# 建構索引
-uv run python scripts/build_index.py
-
-# 啟動 MCP Server
-uv run python apps/mcp_server/server.py
-```
-
-## 驗證 MCP Server
-
-```bash
-# 本機測試
-uv run python tests/mcp_client.py
-
-# 遠端測試（Render）
-uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
-```
-
-## 主要假設
-
-- 使用 `pymupdf` 解析 PDF（速度快、對學術論文表格支援佳）
-- 使用 `python-pptx` 解析 PPTX（逐 slide 提取文字與備註）
-- 混合檢索（BM25 + Voyage AI）；若未設定 `VOYAGE_API_KEY` 則 fallback 到純 BM25
-- MCP transport 使用 Streamable HTTP，部署於 Render（免費 tier）
-- **Render 部署採純 BM25**：embeddings 檔案（`embeddings.npy` / `embedding_ids.json`）為本機重建後產生且未 commit（被 `.gitignore` 排除）；遠端容器啟動時 `VOYAGE_API_KEY` 也未注入，因此 `KnowledgeBase` 會自動 fallback 到純 BM25。本機如需驗證 hybrid，請設定 `VOYAGE_API_KEY` 後重跑 `build_index.py`。
-
-## 已知限制
-
-- **B-01**：PDF 第 14–15 頁的視覺化範例圖內嵌大量重複文字（如 `The Law will never be perfect ...`），BM25 純詞頻計分會把這些噪音 chunk 排到高位。緩解方案是 hybrid search（embedding 對語意敏感），但目前遠端僅有 BM25，因此這個 retrieval bias 仍存在。本機啟用 Voyage embedding 後可顯著降低其影響。
+---
 
 ## Task Completion Checklist
 
@@ -125,9 +53,9 @@ uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/transformer.pdf` (15 pages) + `data/raw/transformer_presentation.pptx` |
+| Ingest messy enterprise documents (PDF + PPTX) | ✅ | `data/raw/attention.pdf` (15 pages) + `data/raw/attention_presentation.pptx` |
 | Extract, clean, and chunk content | ✅ | `packages/doc_preprocessor/` — block-level parse → paragraph-aware clean → sentence-boundary chunk |
-| Searchable knowledge base | ✅ | `data/processed/chunks.jsonl` + BM25 index; hybrid BM25 + Voyage AI embedding when `VOYAGE_API_KEY` is set |
+| Searchable knowledge base | ✅ | `data/processed/chunks.jsonl` + BM25 index; hybrid BM25 + Voyage AI when `VOYAGE_API_KEY` is set |
 | Remote MCP Server with tools | ✅ | FastMCP server exposing `search`, `get_chunk`, `list_documents` via Streamable HTTP |
 | LLM agent can connect and query | ✅ | Claude Desktop connects via `mcp-remote`; custom test client in `tests/mcp_client.py` |
 | Verifiable outputs | ✅ | `uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp` — 5/5 tests pass |
@@ -136,34 +64,147 @@ uv run python tests/mcp_client.py --url "https://docpilot-5hht.onrender.com/mcp"
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Reusable Skills for PDF parsing, PPTX parsing, text cleaning, structured formatting | ✅ | `parse-pdf`, `parse-pptx`, `clean-text`, `chunk-content` — four independent skills |
-| Clear inputs/outputs | ✅ | Each skill has a `SKILL.md` documenting accepted arguments and output schema; results auto-saved to `data/processed/` with path printed on completion |
-| Safe execution boundary | ✅ | Each skill enforces `MAX_FILE_SIZE_BYTES` and hard-cap validation before processing |
-| Easily installed and invoked by Claude Code | ✅ | One `cp -r` per skill to install; invoked by natural language in Claude Code (see Skills section above) |
-| Verifiable outputs | ✅ | Output files written to `data/processed/` on every run; e.g. `transformer_parsed.json`, `transformer_chunks.json` |
+| Reusable Skills for PDF/PPTX parsing, text cleaning, structured formatting | ✅ | `parse-pdf`, `parse-pptx`, `clean-text`, `chunk-content` — four independent skills |
+| Clear inputs/outputs | ✅ | Each skill has a `SKILL.md` documenting accepted arguments and output schema |
+| Safe execution boundary | ✅ | Each skill enforces `MAX_FILE_SIZE_BYTES` hard-cap validation before processing |
+| Easily installed and invoked by Claude Code | ✅ | One `cp -r` per skill to install; invoked by natural language in Claude Code |
+| Verifiable outputs | ✅ | Output files written to `data/processed/` on every run |
 
-## AI 協作工作流程
+---
 
-詳見 [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md)。
+## Getting Started
 
-## 部署
+**Prerequisites:** Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), and optionally a `VOYAGE_API_KEY` (enables hybrid BM25 + Voyage AI search; falls back to pure BM25 without it).
 
-**Public MCP Server**（Render）：https://docpilot-5hht.onrender.com
+```bash
+# 1. Install dependencies
+uv sync
 
-- 部署平台：Render（免費 tier，auto-scale down 後有 ~30s 冷啟動）
-- 連線測試：見上方「驗證 MCP Server」章節
-- Claude Desktop：透過 `mcp-remote` 橋接連線此遠端 server，設定方式見 [DEMO.md](DEMO.md) Step 3
+# 2. Build the search index
+uv run python scripts/build_index.py
 
-## 目錄結構
+# 3. Start the MCP server locally
+uv run python apps/mcp_server/server.py
+# → http://localhost:8000/mcp
+
+# 4. Run all tests
+uv run pytest                          # 46 unit tests
+uv run python tests/mcp_client.py      # MCP integration, 5/5
+```
+
+**Install Claude Skills** (copy to Claude Code's skills directory):
+
+```bash
+cp -r skills/parse-pdf      ~/.claude/skills/
+cp -r skills/parse-pptx     ~/.claude/skills/
+cp -r skills/clean-text     ~/.claude/skills/
+cp -r skills/chunk-content  ~/.claude/skills/
+```
+
+After installing, invoke any skill with natural language inside Claude Code — for example:
+
+> "Parse data/raw/attention.pdf"
+
+Results are auto-saved to `data/processed/` and the output path is printed on completion.
+
+---
+
+## Implementation
+
+### Task 1 — Document Pipeline & MCP Server
+
+The pipeline runs in four stages:
 
 ```
-raydium-takehome/
-├── data/raw/               原始文件（PDF、PPTX）
-├── data/processed/         切塊後的 JSONL 與索引
-├── packages/doc_preprocessor/  核心解析 library
-├── apps/mcp_server/        FastMCP 伺服器
-├── skills/                 Claude Code Skills
-├── scripts/                索引建構腳本
-├── tests/                  單元測試 + MCP client 測試
-└── docs/                   工作流程文件
+Raw Docs (PDF / PPTX)
+  → parse   block-level extraction  (paragraph | caption | heading)
+  → clean   unicode fix, soft-hyphen repair, paragraph-aware whitespace
+  → chunk   sentence-boundary split, caption isolation, sentence-level overlap
+  → index   BM25  +  Voyage AI embeddings
+                │
+                ▼
+         FastMCP Server (/mcp)  ←  LLM Agent
 ```
+
+**Parsing** — PDF uses PyMuPDF `get_text("blocks")` to extract paragraph-level blocks; captions are detected by regex (`^(Figure|Fig|Table)\s*\d+[:.]`). PPTX title placeholders are tagged as `heading`. A noise filter (`_is_figure_token_noise`) drops blocks with >10 lines and <3 chars/line average, removing embedded visualisation tokens.
+
+**Chunking** — Captions and headings always become standalone chunks. Body paragraphs are greedily packed up to 220 words, split at sentence boundaries when oversized, and stitched together with one-sentence overlap so context is not lost at chunk boundaries.
+
+**Retrieval** — `KnowledgeBase` in `retrieval.py` tries to load Voyage AI embeddings on startup; if `VOYAGE_API_KEY` is absent or the embeddings file is missing, it silently falls back to BM25-only. The remote Render deployment uses BM25-only (embeddings are excluded from the repo via `.gitignore`).
+
+**MCP tools** exposed via Streamable HTTP:
+
+| Tool | Parameters | Returns |
+|---|---|---|
+| `search` | `query: str`, `top_k: int = 5` | Ranked chunks with score, text, source, page/slide |
+| `get_chunk` | `chunk_id: str` | Full chunk record, or `null` if not found |
+| `list_documents` | — | Document list with source filename and chunk count |
+
+### Task 2 — Claude Code Skills
+
+Four skills wrap each stage of the preprocessing pipeline:
+
+| Skill | What it does | Output |
+|---|---|---|
+| `parse-pdf` | Extracts blocks from a PDF | JSON — blocks typed `paragraph` / `caption` |
+| `parse-pptx` | Extracts blocks from a PPTX | JSON — blocks typed `heading` / `paragraph` |
+| `clean-text` | Cleans raw text (unicode, soft-hyphens, line breaks) | Cleaned text |
+| `chunk-content` | Splits blocks into RAG-ready chunks | JSON chunks with overlap |
+
+Each skill enforces a `MAX_FILE_SIZE_BYTES` hard cap before processing and ships with a `SKILL.md` documenting all accepted arguments and the output schema.
+
+The entire project was built using **Claude Code** as the primary coding agent. See [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md) for a stage-by-stage log of AI-assisted design decisions, debugging, and verification.
+
+---
+
+## Project Structure
+
+```
+docpilot/
+├── packages/doc_preprocessor/   core parse / clean / chunk library
+│   ├── pdf.py                   PyMuPDF block extractor + noise filter
+│   ├── pptx.py                  python-pptx block extractor
+│   ├── cleaner.py               paragraph-aware text cleaner
+│   └── chunker.py               sentence-boundary chunker
+├── apps/mcp_server/
+│   ├── server.py                FastMCP tool definitions
+│   ├── retrieval.py             KnowledgeBase (BM25 + Voyage AI)
+│   └── Dockerfile
+├── skills/                      4 Claude Code Skills
+│   ├── parse-pdf/
+│   ├── parse-pptx/
+│   ├── clean-text/
+│   └── chunk-content/
+├── scripts/
+│   ├── build_index.py           builds chunks.jsonl + BM25/embedding index
+│   └── demo_pipeline.py         visual pipeline walkthrough → data/processed/demo/
+├── tests/
+│   ├── test_preprocessor.py     46 unit tests
+│   └── mcp_client.py            MCP integration test (5 assertions)
+├── data/
+│   ├── raw/                     attention.pdf + attention_presentation.pptx
+│   └── processed/               chunks.jsonl, BM25 index files
+└── docs/AI_WORKFLOW.md          stage-by-stage AI collaboration log
+```
+
+---
+
+## AI Collaboration Workflow
+
+This entire project was built using **Claude Code** as the primary coding agent — from initial architecture decisions to debugging and deployment. The workflow followed a stage-by-stage structure where each stage was planned, implemented, and verified before moving on.
+
+See [docs/AI_WORKFLOW.md](docs/AI_WORKFLOW.md) for a detailed log covering:
+- How each stage was designed in collaboration with the AI agent
+- Key design decisions and trade-offs surfaced during development
+- Debugging sessions and how issues were diagnosed and resolved
+- Verification steps taken at each stage before committing
+
+---
+
+## Future Work
+
+| # | Feature | Description |
+|---|---|---|
+| T-01 | Table extraction | Use `page.find_tables()` (PyMuPDF ≥ 1.23) to detect table regions and convert them to Markdown, preserving column/row structure as a `table` block type |
+| T-02 | Two-column layout fix | Sort blocks by `x0` to detect left/right columns, then merge in correct reading order |
+| T-03 | Spatial chunk grouping | Group blocks with similar `y0` coordinates into visual units to avoid merging content across section breaks |
