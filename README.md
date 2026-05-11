@@ -137,7 +137,7 @@ Raw Docs (PDF / PPTX)
          FastMCP Server (/mcp)  ←  LLM Agent
 ```
 
-**Parsing** — PDF uses PyMuPDF `get_text("blocks")` to extract paragraph-level blocks; captions are detected by regex (`^(Figure|Fig|Table)\s*\d+[:.]`). PPTX title placeholders are tagged as `heading`. A noise filter (`_is_figure_token_noise`) drops blocks with >10 lines and <3 chars/line average, removing embedded visualisation tokens.
+**Parsing** — PDF uses PyMuPDF `get_text("blocks")` to extract paragraph-level blocks; captions are detected by regex matching `Figure|Fig|Table` plus Chinese `圖|表` and compound identifiers (`Figure A.1`, `Figure 1.1`, `Figure 1A`). PPTX title placeholders (`placeholder_format.idx == 0`) are tagged as `heading`. A noise filter (`_is_figure_token_noise`) drops blocks with >10 lines and <3 words/line average, removing embedded visualisation tokens.
 
 **Chunking** — Captions and headings always become standalone chunks. Body paragraphs are greedily packed up to 220 words, split at sentence boundaries when oversized, and stitched together with one-sentence overlap so context is not lost at chunk boundaries.
 
@@ -147,7 +147,7 @@ Raw Docs (PDF / PPTX)
 
 | Tool | Parameters | Returns |
 |---|---|---|
-| `search` | `query: str`, `top_k: int = 5` | Ranked chunks with score, text, source, page/slide |
+| `search` | `query: str`, `top_k: int = 5` | Ranked chunks with score, text, source, page_or_slide |
 | `get_chunk` | `chunk_id: str` | Full chunk record, or `null` if not found |
 | `list_documents` | — | Document list with source filename and chunk count |
 
