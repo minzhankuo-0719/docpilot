@@ -3,7 +3,9 @@
 > Unstructured document pipeline · Remote MCP Server · Claude Code Skills
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![uv](https://img.shields.io/badge/package%20manager-uv-DE5FE9)](https://docs.astral.sh/uv/)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-5e6ad2)](https://modelcontextprotocol.io/)
+[![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-D97757)](https://claude.com/claude-code)
 [![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7.svg)](https://docpilot-5hht.onrender.com)
 
 ---
