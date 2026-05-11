@@ -13,6 +13,7 @@ Transport
 """
 from __future__ import annotations
 
+import base64
 import os
 import sys
 from contextlib import asynccontextmanager
@@ -26,8 +27,18 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(SERVER_DIR))  # so `from retrieval import kb` always resolves
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import Icon
 
 from retrieval import kb  # relative import — server is run from its own dir
+
+
+def _icon_data_uri() -> str | None:
+    """Read bundled icon.png and return it as a base64 data URI, or None if absent."""
+    icon_path = SERVER_DIR / "icon.png"
+    if not icon_path.exists():
+        return None
+    encoded = base64.b64encode(icon_path.read_bytes()).decode()
+    return f"data:image/png;base64,{encoded}"
 
 # Guardrails for the public search() tool. Tight enough that an over-eager
 # agent can't blow through the free-tier instance, generous enough to cover
@@ -52,6 +63,9 @@ async def _lifespan(server: FastMCP) -> AsyncIterator[None]:
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "8000"))
 
+_icon_uri = _icon_data_uri()
+_icons = [Icon(src=_icon_uri, mimeType="image/png", sizes=["128x128"])] if _icon_uri else None
+
 mcp = FastMCP(
     name="docpilot",
     instructions=(
@@ -59,6 +73,8 @@ mcp = FastMCP(
         "slide deck.  Use `search` to find relevant passages, `get_chunk` to retrieve "
         "a specific chunk by ID, and `list_documents` to see what is available."
     ),
+    website_url="https://github.com/minzhankuo-0719/docpilot",
+    icons=_icons,
     host=HOST,
     port=PORT,
     lifespan=_lifespan,
