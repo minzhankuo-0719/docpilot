@@ -30,26 +30,60 @@ This project completes **Task 1** and **Task 2** from the Raydium AI Engineer ta
 
 ## Demo & Verification
 
-### Video walkthrough
+### Connect Claude Desktop to docpilot (Task 1)
 
-<!-- TODO: paste Loom / YouTube link here -->
-> 📹 [Watch demo](https://...)  *(Task 1: MCP client 5/5 pass · Task 2: Claude Code invoking Skills)*
+> **Video reference:** [How to install MCP servers in Claude Desktop](https://youtu.be/i7LuJPNKQYI?si=3EzQYxNDKMlOHhBW) — if you haven't set up a remote MCP server before, watch this first (5 min).
 
-### MCP Server — remote test (Task 1)
+**Prerequisites:** [Node.js](https://nodejs.org/) must be installed (needed for `npx mcp-remote`).
 
-Run the test client against the live Render deployment:
+1. Open **Claude Desktop** → **Settings** → **Developer**
+2. Click **Edit Config** — Claude Desktop will open a folder containing `claude_desktop_config.json`
+3. Open `claude_desktop_config.json` and paste the following (merge with any existing `mcpServers` entries if you already have others):
 
-```bash
-uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp
+```json
+{
+  "mcpServers": {
+    "docpilot": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://docpilot-5hht.onrender.com/mcp"
+      ]
+    }
+  }
+}
 ```
 
-<!-- TODO: replace with actual screenshot -->
-![MCP client 5/5 pass](docs/screenshots/mcp_client_pass.png)
+4. Save the file and **restart Claude Desktop**
+5. Open a new conversation and try asking:
+
+    > *"Use docpilot to search for information about the attention mechanism"*
+
+### Claude Desktop demo (Task 1)
+
+The screenshot below shows four live queries answered by Claude Desktop using the docpilot MCP server. Each response is labelled **"Used docpilot integration"**, confirming the tool call went through.
+
+| Query | Tool / Source retrieved |
+|---|---|
+| *"Please introduce me to docpilot"* | `list_documents` — lists both indexed documents with chunk counts |
+| *"What is MultiHead Attention?"* | `search` → `transformer.pdf` p.4–5, §3.2.2 |
+| *"In transformer.pdf, what does Table 1 describe?"* | `search` → `transformer.pdf` p.6, §4 — 4-column comparison table |
+| *"In transformer_presentation.pptx, what does page 13 cover?"* | `search` → `transformer_presentation.pptx` p.13, Scaled Dot-Product Attention |
+
+![Claude Desktop demo — docpilot MCP integration](docs/screenshots/claude_desktop_demo.jpg)
 
 ### Claude Code Skills — invocation (Task 2)
 
-<!-- TODO: replace with actual screenshot -->
-![Claude Code invoking parse-pdf skill](docs/screenshots/skill_parse_pdf.png)
+The screenshot below shows all four skills being invoked by Claude Code in a single pipeline session. Each skill is triggered by natural language and runs `scripts/run.py` internally.
+
+| Skill | Input | Output |
+|---|---|---|
+| `parse-pdf` | `data/raw/transformer.pdf` | `data/processed/transformer_parsed.json` |
+| `parse-pptx` | `data/raw/transformer_presentation.pptx` | `data/processed/transformer_presentation_parsed.json` |
+| `clean-text` | `data/processed/transformer_parsed.json` | `data/processed/cleaned_text.txt` |
+| `chunk-content` | `data/processed/cleaned_text.txt` | `data/processed/transformer_chunks.json` |
+
+![Claude Code Skills demo — parse-pdf, parse-pptx, clean-text, chunk-content](docs/screenshots/claude_skills_demo.jpg)
 
 ---
 
