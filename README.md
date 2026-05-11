@@ -1,13 +1,6 @@
-<table>
-<tr>
-<td width="220" align="center">
-  <img src="docs/docpilot-logo.png" width="200" alt="docpilot logo"/>
-</td>
-<td>
+<img src="docs/docpilot-logo.png" align="left" width="150" hspace="24" vspace="8" alt="docpilot logo"/>
 
-# docpilot
-
-**Turn messy enterprise documents into a queryable knowledge base.**
+<!-- **Turn messy enterprise documents into a queryable knowledge base.** -->
 
 *Unstructured document pipeline · Remote MCP Server · Claude Code Skills*
 
@@ -17,9 +10,7 @@
 [![Built with Claude Code](https://img.shields.io/badge/built%20with-Claude%20Code-D97757)](https://claude.com/claude-code)
 [![Deploy: Render](https://img.shields.io/badge/deploy-Render-46E3B7.svg)](https://docpilot-5hht.onrender.com)
 
-</td>
-</tr>
-</table>
+<!-- <br clear="left"/> -->
 
 ---
 
