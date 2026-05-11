@@ -94,6 +94,15 @@ uv run pytest                          # 56 unit tests
 uv run python tests/mcp_client.py      # MCP integration, 5/5
 ```
 
+**(Optional) Enable hybrid BM25 + Voyage AI search** — create a `.env` file at the repo root containing `VOYAGE_API_KEY=your-key-here`, then prepend `--env-file .env` to the `build_index.py` and `server.py` commands so uv loads the key into the process:
+
+```bash
+uv run --env-file .env python scripts/build_index.py
+uv run --env-file .env python apps/mcp_server/server.py
+```
+
+Without the key, both fall back to BM25-only silently.
+
 **Install Claude Skills** (copy to Claude Code's skills directory):
 
 ```bash
@@ -132,7 +141,7 @@ Raw Docs (PDF / PPTX)
 
 **Chunking** — Captions and headings always become standalone chunks. Body paragraphs are greedily packed up to 220 words, split at sentence boundaries when oversized, and stitched together with one-sentence overlap so context is not lost at chunk boundaries.
 
-**Retrieval** — `KnowledgeBase` in `retrieval.py` tries to load Voyage AI embeddings on startup; if `VOYAGE_API_KEY` is absent or the embeddings file is missing, it silently falls back to BM25-only. The remote Render deployment uses BM25-only (embeddings are excluded from the repo via `.gitignore`).
+**Retrieval** — `KnowledgeBase` in `retrieval.py` enables hybrid search when both `VOYAGE_API_KEY` is set and `embeddings.npy` is present; otherwise it falls back silently to BM25-only. The embeddings file is checked into the repo (whitelisted in `.gitignore`) and shipped in the Docker image, so the remote Render deployment runs in hybrid mode whenever its `VOYAGE_API_KEY` env var is configured.
 
 **MCP tools** exposed via Streamable HTTP:
 
