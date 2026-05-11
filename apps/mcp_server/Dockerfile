@@ -15,8 +15,6 @@ RUN uv pip install --system --no-cache \
     "mcp[cli]" \
     rank-bm25 \
     voyageai \
-    httpx \
-    python-dotenv \
     numpy
 
 # Copy source

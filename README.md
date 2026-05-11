@@ -79,8 +79,8 @@ uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp
 **Prerequisites:** Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), and optionally a `VOYAGE_API_KEY` (enables hybrid BM25 + Voyage AI search; falls back to pure BM25 without it).
 
 ```bash
-# 1. Install dependencies
-uv sync
+# 1. Install dependencies (includes dev extras: pytest, ruff)
+uv sync --all-extras
 
 # 2. Build the search index
 uv run python scripts/build_index.py
