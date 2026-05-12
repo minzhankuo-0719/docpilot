@@ -14,6 +14,19 @@
 
 ---
 
+## Contents
+
+- [Assignment](#assignment) — what this project solves
+- [Demo & Verification](#demo--verification) — screenshots + how to test live
+- [Getting Started](#getting-started) — clone, install, run
+- [Implementation](#implementation) — pipeline + MCP architecture
+- [Task Completion Checklist](#task-completion-checklist) — requirement-by-requirement status
+- [Project Structure](#project-structure) — repo layout
+- [AI Collaboration Workflow](#ai-collaboration-workflow) — how Claude Code was used
+- [Future Work](#future-work) — known gaps
+
+---
+
 ## Assignment
 
 This project completes **Task 1** and **Task 2** from the Raydium AI Engineer take-home:
@@ -89,25 +102,67 @@ The screenshot below shows all four skills being invoked by Claude Code in a sin
 
 ## Getting Started
 
-**Prerequisites:** Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), and optionally a `VOYAGE_API_KEY` (enables hybrid BM25 + Voyage AI search; falls back to pure BM25 without it).
+**Prerequisites:** Python ≥ 3.11, [uv](https://docs.astral.sh/uv/) (install: `curl -LsSf https://astral.sh/uv/install.sh | sh`), and optionally a `VOYAGE_API_KEY` (enables hybrid BM25 + Voyage AI search; falls back to pure BM25 without it).
+
+### 1. Setup
+
+Clone the repo and install dependencies:
 
 ```bash
-# 1. Install dependencies (includes dev extras: pytest, ruff)
-uv sync --all-extras
-
-# 2. Build the search index
-uv run python scripts/build_index.py
-
-# 3. Start the MCP server locally
-uv run python apps/mcp_server/server.py
-# → http://localhost:8000/mcp
-
-# 4. Run all tests
-uv run pytest                          # 56 unit tests
-uv run python tests/mcp_client.py      # MCP integration, 5/5
+git clone https://github.com/minzhankuo-0719/docpilot.git
+cd docpilot
+uv sync --all-extras                   # installs runtime + dev extras (pytest, ruff)
 ```
 
-**(Optional) Enable hybrid BM25 + Voyage AI search** — create a `.env` file at the repo root containing `VOYAGE_API_KEY=your-key-here`, then prepend `--env-file .env` to the `build_index.py` and `server.py` commands so uv loads the key into the process:
+### 2. Verify the live deployment
+
+The fastest end-to-end check — no local index or server required, just hits the Render URL directly:
+
+```bash
+uv run python tests/mcp_client.py --url https://docpilot-5hht.onrender.com/mcp
+```
+
+> Render's free tier has a ~30s cold start. If the first call times out, just rerun.
+
+### 3. Verify locally
+
+First build the search index:
+
+```bash
+uv run python scripts/build_index.py   # writes chunks.jsonl + BM25 index
+```
+
+Run the unit tests — no server needed:
+
+```bash
+uv run pytest                          # 56 unit tests
+```
+
+Start the MCP server in **terminal 1** and leave it running:
+
+```bash
+uv run python apps/mcp_server/server.py
+# → http://localhost:8000/mcp
+```
+
+In **terminal 2**, run the MCP integration test:
+
+```bash
+uv run python tests/mcp_client.py      # 5/5
+```
+
+### Optional — hybrid BM25 + Voyage AI search
+
+Sign up at <https://dash.voyageai.com/>, then go to the **API Keys** section of the dashboard and click **Create new secret key**. Voyage AI offers a free quota that is sufficient for indexing and querying this project's two demo documents.
+
+Once you have the key, create a `.env` file at the repo root:
+
+```bash
+# .env
+VOYAGE_API_KEY=your-key-here
+```
+
+Then prepend `--env-file .env` to the `build_index.py` and `server.py` commands so uv loads the key into the process:
 
 ```bash
 uv run --env-file .env python scripts/build_index.py
@@ -116,9 +171,12 @@ uv run --env-file .env python apps/mcp_server/server.py
 
 Without the key, both fall back to BM25-only silently.
 
-**Install Claude Skills** (copy to Claude Code's skills directory):
+### Install Claude Skills
+
+Copy each skill to Claude Code's skills directory:
 
 ```bash
+mkdir -p ~/.claude/skills/
 cp -r skills/parse-pdf      ~/.claude/skills/
 cp -r skills/parse-pptx     ~/.claude/skills/
 cp -r skills/clean-text     ~/.claude/skills/
@@ -129,7 +187,7 @@ After installing, invoke any skill with natural language inside Claude Code — 
 
 > "Parse data/raw/transformer.pdf"
 
-Results are auto-saved to `data/processed/` and the output path is printed on completion.
+Results are auto-saved to `data/processed/` and the output path is printed on completion. If Claude Code is already running, restart the session so the new skills are picked up.
 
 ---
 
